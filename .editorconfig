@@ -1,0 +1,45 @@
+
+[*]
+
+# Microsoft .NET properties
+csharp_indent_braces = false
+csharp_new_line_before_members_in_object_initializers = false
+csharp_new_line_before_open_brace = accessors,anonymous_types,control_blocks,events,indexers,local_functions,methods,object_collection_array_initalizers,properties,types
+csharp_preferred_modifier_order = protected, override, private, internal, file, new, public, abstract, virtual, sealed, async, readonly, extern, unsafe, volatile, static, required:suggestion
+csharp_preserve_single_line_blocks = true
+csharp_style_namespace_declarations = block_scoped:suggestion
+
+# ReSharper properties
+resharper_align_linq_query = true
+resharper_arguments_anonymous_function = named
+resharper_arguments_skip_single = true
+resharper_blank_lines_after_block_statements = 0
+resharper_blank_lines_after_start_comment = 0
+resharper_csharp_blank_lines_around_invocable = 0
+resharper_csharp_blank_lines_around_single_line_field = 1
+resharper_csharp_continuous_indent_multiplier = 0
+resharper_csharp_indent_invocation_pars = outside
+resharper_csharp_insert_final_newline = true
+resharper_csharp_keep_existing_enum_arrangement = false
+resharper_csharp_max_line_length = 1461
+resharper_csharp_remove_blank_lines_near_braces_in_code = false
+resharper_csharp_remove_blank_lines_near_braces_in_declarations = false
+resharper_csharp_space_around_alias_eq = false
+resharper_csharp_space_before_trailing_comment = false
+resharper_csharp_wrap_arguments_style = chop_if_long
+resharper_csharp_wrap_parameters_style = chop_if_long
+resharper_default_private_modifier = implicit
+resharper_indent_preprocessor_other = do_not_change
+resharper_instance_members_qualify_declared_in = 
+resharper_keep_existing_attribute_arrangement = true
+resharper_max_attribute_length_for_same_line = 10000
+resharper_method_or_operator_body = expression_body
+resharper_parentheses_redundancy_style = remove
+resharper_place_accessorholder_attribute_on_same_line = false
+resharper_place_expr_method_on_single_line = true
+resharper_place_expr_property_on_single_line = true
+resharper_place_method_attribute_on_same_line = true
+resharper_space_within_empty_braces = false
+resharper_use_continuous_indent_inside_initializer_braces = false
+resharper_use_continuous_indent_inside_parens = false
+resharper_wrap_object_and_collection_initializer_style = chop_always
