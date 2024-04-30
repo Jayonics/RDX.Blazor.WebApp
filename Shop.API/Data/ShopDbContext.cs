@@ -273,6 +273,13 @@ namespace Shop.API.Data
                 UserName = "Sarah"
 
             });
+            // Add an Admin user
+            modelBuilder.Entity<User>().HasData(new User
+            {
+                Id = 3,
+                UserName = "Admin",
+                Admin = true
+            });
 
             //Create Shopping Cart for Users
             modelBuilder.Entity<Cart>().HasData(new Cart
