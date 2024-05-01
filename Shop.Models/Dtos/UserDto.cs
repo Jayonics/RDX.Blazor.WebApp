@@ -10,6 +10,6 @@ namespace Shop.Models.Dtos
     {
         public int Id { get; set; }
         public string UserName { get; set; }
-        public bool Admin { get; set; }
+        public bool? Admin { get; set; }
     }
 }
