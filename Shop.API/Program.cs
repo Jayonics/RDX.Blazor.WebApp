@@ -12,9 +12,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// If the computername is "INF-LAP-MSI1", use the DevDatabaseConnection connection string,
+// if the computername is "JH-WIN-PC1", use the TestDatabaseConnection connection string,
+
+var computerName = Environment.MachineName;
+var connectionString = computerName switch
+{
+    "INF-LAP-MSI1" => builder.Configuration.GetConnectionString("DevDatabaseConnection"),
+    "JH-WIN-PC1" => builder.Configuration.GetConnectionString("TestDatabaseConnection"),
+    _ => builder.Configuration.GetConnectionString("DefaultConnection")
+};
+
 builder.Services.AddDbContextPool<ShopDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ShopDatabaseConnection"));
+    options.UseSqlServer(connectionString);
 });
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
