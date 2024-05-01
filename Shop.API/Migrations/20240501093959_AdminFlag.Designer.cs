@@ -11,7 +11,7 @@ using Shop.API.Data;
 namespace Shop.API.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    [Migration("20240430142506_AdminFlag")]
+    [Migration("20240501093959_AdminFlag")]
     partial class AdminFlag
     {
         /// <inheritdoc />

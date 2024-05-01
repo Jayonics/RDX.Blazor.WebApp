@@ -60,7 +60,5 @@ namespace Shop.API.Controllers
                 "Error retrieving data from the database");
             }
         }
-
-      
     }   
 }

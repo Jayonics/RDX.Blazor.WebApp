@@ -13,6 +13,8 @@ namespace Shop.API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+        private readonly IUserRepository userRepository;
+
         public UserController(IUserRepository userRepository)
         {
             this.userRepository = userRepository;
@@ -29,12 +31,26 @@ namespace Shop.API.Controllers
             {
                 // Fetch all users from the repository
                 var users = await this.userRepository.GetUsers();
+
+                // If the users are null, return a NotFound status
+                if (users == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    // Convert the users to DTOs
+                    var userDtos = users.ConvertToDto();
+
+                    // Return the converted DTOs with an Ok status
+                    return Ok(userDtos);
+                }
             }
             catch (Exception)
             {
                 // Return a 500 Internal Server Error status with a custom error message
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                                   "Error retrieving data from the database");
+                "Error retrieving data from the database");
             }
         }
     }

@@ -32,5 +32,21 @@ namespace Shop.API.Extensions
                         CategoryName = productCategory.Name
                     }).ToList();
         }
+
+        /// <summary>
+        /// Converts a collection of User entities to UserDto objects.
+        /// </summary>
+        /// <param name="users">The collection of User entities to convert.</param>
+        /// <returns>A collection of UserDto objects.</returns>
+        public static IEnumerable<UserDto> ConvertToDto(this IEnumerable<User> users)
+        {
+            return (from user in users
+                    select new UserDto
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        Admin = user.Admin,
+                    }).ToList();
+        }
     }
 }
