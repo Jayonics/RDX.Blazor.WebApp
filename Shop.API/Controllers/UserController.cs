@@ -23,7 +23,7 @@ namespace Shop.API.Controllers
         /// <summary>
         /// Returns all users in the Users table.
         /// </summary>
-        [HttpGet("users")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
             // Try to execute the following code
