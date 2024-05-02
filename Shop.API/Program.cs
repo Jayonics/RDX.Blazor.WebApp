@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using Shop.API.Data;
 using Shop.API.Repositories;
 using Shop.API.Repositories.Contracts;
@@ -31,8 +32,7 @@ var connectionString = computerName switch
 // This is the Dependency Injection (DI) container
 
 // Add a database context to the services with a connection pool
-builder.Services.AddDbContextPool<ShopDbContext>(options =>
-{
+builder.Services.AddDbContextPool<ShopDbContext>(options => {
     // Use SQL Server with the selected connection string
     options.UseSqlServer(connectionString);
 });
@@ -54,6 +54,13 @@ if (app.Environment.IsDevelopment())
     // Use Swagger UI
     app.UseSwaggerUI();
 }
+
+// Allow Web project CORS
+app.UseCors(policy =>
+    policy.WithOrigins("https://localhost:7138", "http://localhost:7138")
+    .AllowAnyMethod()
+    .WithHeaders(HeaderNames.ContentType)
+);
 
 // Use HTTPS redirection
 app.UseHttpsRedirection();
