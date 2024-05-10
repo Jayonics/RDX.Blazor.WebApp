@@ -1,5 +1,5 @@
 ﻿<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Shop.API: https [NoBuild]" type="LaunchSettings" factoryName=".NET Launch Settings Profile" singleton="false">
+  <configuration default="false" name="Shop.API: https [NoBuild]" type="LaunchSettings" factoryName=".NET Launch Settings Profile" singleton="true">
     <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/Shop.API/Shop.API.csproj" />
     <option name="LAUNCH_PROFILE_TFM" value="net8.0" />
     <option name="LAUNCH_PROFILE_NAME" value="https" />
