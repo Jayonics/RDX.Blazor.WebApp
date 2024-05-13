@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using Shop.Models.Dtos;
+﻿using Shop.Models.Dtos;
 using Shop.WebApp.Services.Contracts;
 
 namespace Shop.WebApp.Services
