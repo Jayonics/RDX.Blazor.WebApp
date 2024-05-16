@@ -34,6 +34,26 @@ namespace Shop.API.Extensions
         }
 
         /// <summary>
+        /// Converts a single Product entity to a ProductDto object.
+        /// </summary>
+        /// <param name="product">The Product entity to convert.</param>
+        /// <param name="productCategory">The ProductCategory entity to use for category information.</param>
+        /// <returns>A ProductDto object.</returns>
+        public static ProductDto ConvertToDto(this Product product, ProductCategory productCategory)
+        {
+            return new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                ImageURL = product.ImageURL,
+                Price = product.Price,
+                Quantity = product.Quantity,
+                CategoryId = product.CategoryId,
+                CategoryName = productCategory.Name
+            };
+        }
+        /// <summary>
         /// Converts a collection of User entities to UserDto objects.
         /// </summary>
         /// <param name="users">The collection of User entities to convert.</param>
