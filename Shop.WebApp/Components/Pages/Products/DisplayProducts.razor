@@ -28,34 +28,35 @@
 
 @foreach (var item in Products)
 {
-<div class="col-md-3 mb-2">
-    <a href="product/@item.Id">
-        <div class="card">
-            <img class="img-thumbnail" src="@item.ImageURL" alt="@item.Name"/>
-            <div class="card-body">
-                <h5 class="card-title mb-3">
-                    @item.Name
-                </h5>
-                <p class="card-text">
-                    <b>@item.Price.ToString("C")</b>
-                </p>
-            </div>
-            <AuthorizeView Roles="Admin, Staff">
-                <div class="card-footer d-flex justify-content-between">
-                    <button class="btn btn-primary" @onclick="() => EditProduct(item.Id)">
-                        Edit
-                    </button>
-                    <button class="btn btn-danger">
-                        Delete
-                    </button>
+    <div class="col-md-3 mb-2">
+        <a href="product/@item.Id">
+            <div class="card">
+                <img class="img-thumbnail" src="@item.ImageURL" alt="@item.Name"/>
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        @item.Name
+                    </h5>
+                    <p class="card-text">
+                        <b>@item.Price.ToString("C")</b>
+                    </p>
                 </div>
-            </AuthorizeView>
-        </div>
-    </a>
-</div>
+                <AuthorizeView Roles="Admin, Staff">
+                    <div class="card-footer d-flex justify-content-between">
+                        <button class="btn btn-primary" @onclick="() => EditProduct(item.Id)">
+                            Edit
+                        </button>
+                        <button class="btn btn-danger">
+                            Delete
+                        </button>
+                    </div>
+                </AuthorizeView>
+            </div>
+        </a>
+    </div>
 }
 
 @code {
+
     [Inject]
     NavigationManager NavigationManager { get; set; }
 
@@ -67,3 +68,4 @@
         NavigationManager.NavigateTo($"/editproduct/{productId}");
     }
 }
+
