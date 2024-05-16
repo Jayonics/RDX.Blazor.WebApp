@@ -9,14 +9,31 @@
 }
 else
 {
-    <h3>@product.Name</h3>
-
-    <div>
-        <img src="@product.ImageURL" alt="@product.Name"/>
-        <p>@product.Description</p>
-        <p>Price: @product.Price.ToString("C")</p>
-        <p>Quantity: @product.Quantity</p>
-        <p>Category: @product.CategoryName</p>
+    <div class="container-fluid">
+        <h5 class="card-title">@product.Name</h5>
+        <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img class="d-block w-100" src="@product.ImageURL" alt="@product.Name"/>
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+        <div class="card-body">
+            <p class="card-text">@product.Description</p>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Price: @product.Price.ToString("C")</li>
+            <li class="list-group-item">Quantity: @product.Quantity</li>
+            <li class="list-group-item">Category: @product.CategoryName</li>
+        </ul>
     </div>
 }
 
