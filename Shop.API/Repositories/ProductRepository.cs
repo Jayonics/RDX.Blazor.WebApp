@@ -19,9 +19,10 @@ namespace Shop.API.Repositories
             return categories;
         }
 
-        public Task<ProductCategory> GetCategory(int id)
+        public async Task<ProductCategory> GetCategory(int id)
         {
-            throw new NotImplementedException();
+            var category = await shopDbContext.ProductCategories.FindAsync(id);
+            return category;
         }
 
         public async Task<Product> GetProduct(int id)
