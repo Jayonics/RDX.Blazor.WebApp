@@ -1,7 +1,10 @@
 ﻿@page "/products"
-@inherits ProductsBase
+@using Shop.Models.Dtos
+@using Shop.WebApp.Services.Contracts
+@inject IProductService ProductService
+@inject NavigationManager NavigationManager
 
-@if (Products == null)
+@if (ProductList == null)
 {
     <h3>Loading products...</h3>
 }
@@ -9,7 +12,7 @@ else
 {
     <h3 class="mb-5">Products</h3>
 
-    var productCount = Products.Count();
+    var productCount = ProductList.Count();
 
     if (productCount > 0)
     {
@@ -23,5 +26,28 @@ else
                 <hr class="mb-3"/>
             }
         </div>
+    }
+}
+
+@code {
+    public IEnumerable<ProductDto> ProductList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ProductList = await ProductService.GetProducts();
+    }
+
+    protected IOrderedEnumerable<IGrouping<int, ProductDto>> GetGroupedProductsByCategory()
+    {
+        return from product in ProductList
+               group product by product.CategoryId
+               into productByCategoryGroup
+               orderby productByCategoryGroup.Key
+               select productByCategoryGroup;
+    }
+
+    protected string GetCategoryName(IGrouping<int, ProductDto> groupedProductDtos)
+    {
+        return groupedProductDtos.FirstOrDefault(pg => pg.CategoryId == groupedProductDtos.Key).CategoryName;
     }
 }
