@@ -26,7 +26,8 @@ namespace Shop.API.Repositories
 
         public async Task<Product> GetProduct(int id)
         {
-            throw new NotImplementedException();
+            var product = await shopDbContext.Products.FindAsync(id);
+            return product;
         }
 
         public async Task<IEnumerable<Product>> GetProducts()
