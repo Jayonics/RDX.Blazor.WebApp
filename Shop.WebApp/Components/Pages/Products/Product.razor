@@ -68,6 +68,15 @@ else
                     </div>
                 </div>
             </div>
+            <AuthorizeView Roles="Admin, Staff">
+                <div class="card-footer">
+                    <h5 class="card-title text-danger">Administrative actions</h5>
+                    <div class="container">
+                        <button class="btn btn-primary" @onclick="EditProduct">Edit</button>
+                        <button class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </AuthorizeView>
         </div>
     </div>
 }
