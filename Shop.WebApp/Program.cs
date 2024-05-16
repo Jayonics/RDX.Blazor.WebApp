@@ -50,6 +50,8 @@ namespace Shop.WebApp
 
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
+            builder.Services.AddBlazorBootstrap();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
