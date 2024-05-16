@@ -2,7 +2,7 @@
 using Shop.Models.Dtos;
 using Shop.WebApp.Services.Contracts;
 
-namespace Shop.WebApp.Components.Pages
+namespace Shop.WebApp.Components.Products.Pages
 {
     public class ProductsBase : ComponentBase
     {
@@ -13,7 +13,7 @@ namespace Shop.WebApp.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            Products = await ProductService.GetItems();
+            Products = await ProductService.GetProducts();
         }
 
         protected IOrderedEnumerable<IGrouping<int, ProductDto>> GetGroupedProductsByCategory()
