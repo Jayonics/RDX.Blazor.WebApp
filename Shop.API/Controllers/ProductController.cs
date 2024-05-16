@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shop.API.Extensions;
 using Shop.API.Repositories.Contracts;
 using Shop.Models.Dtos;
@@ -59,6 +60,30 @@ namespace Shop.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError,
                 "Error retrieving data from the database");
             }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ProductDto>> GetProduct(int id)
+        {
+            var product = await this.productRepository.GetProduct(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var productCategory = await this.productRepository.GetCategory(product.CategoryId);
+            if (productCategory == null)
+            {
+                return NotFound();
+            }
+
+            var productDto = product.ConvertToDto(productCategory);
+            return Ok(productDto);
+        }
+        private async Task<bool> ProductExists(int id)
+        {
+            var product = await productRepository.GetProduct(id);
+            return product != null;
         }
     }   
 }
