@@ -37,5 +37,11 @@ namespace Shop.API.Repositories
 
             return products;
         }
+
+        public async Task UpdateProduct(Product product)
+        {
+            shopDbContext.Entry(product).State = EntityState.Modified;
+            await shopDbContext.SaveChangesAsync();
+        }
     }
 }

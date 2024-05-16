@@ -53,6 +53,21 @@ namespace Shop.API.Extensions
                 CategoryName = productCategory.Name
             };
         }
+
+        public static Product ConvertToEntity(this ProductDto productDto)
+        {
+            return new Product
+            {
+                Id = productDto.Id,
+                Name = productDto.Name,
+                Description = productDto.Description,
+                ImageURL = productDto.ImageURL,
+                Price = productDto.Price,
+                Quantity = productDto.Quantity,
+                CategoryId = productDto.CategoryId
+            };
+        }
+
         /// <summary>
         /// Converts a collection of User entities to UserDto objects.
         /// </summary>

@@ -80,6 +80,36 @@ namespace Shop.API.Controllers
             var productDto = product.ConvertToDto(productCategory);
             return Ok(productDto);
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, ProductDto productDto)
+        {
+            if (id != productDto.Id)
+            {
+                return BadRequest();
+            }
+
+            var product = productDto.ConvertToEntity();
+
+            try
+            {
+                await this.productRepository.UpdateProduct(product);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!await ProductExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
         private async Task<bool> ProductExists(int id)
         {
             var product = await productRepository.GetProduct(id);
