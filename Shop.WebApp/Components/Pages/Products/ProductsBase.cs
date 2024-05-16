@@ -2,7 +2,7 @@
 using Shop.Models.Dtos;
 using Shop.WebApp.Services.Contracts;
 
-namespace Shop.WebApp.Components.Products.Pages
+namespace Shop.WebApp.Components.Pages.Products
 {
     public class ProductsBase : ComponentBase
     {
