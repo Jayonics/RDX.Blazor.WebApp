@@ -29,13 +29,13 @@ namespace Shop.API.Controllers
         /// </summary>
         /// <returns>A list of product DTOs.</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetItems()
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
         {
             // Try to execute the following code
             try
             {
                 // Fetch all products from the repository
-                var products = await this.productRepository.GetItems();
+                var products = await this.productRepository.GetProducts();
                 // Fetch all product categories from the repository
                 var productCategories = await this.productRepository.GetCategories();
 

@@ -24,12 +24,12 @@ namespace Shop.API.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<Product> GetItem(int id)
+        public async Task<Product> GetProduct(int id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<Product>> GetItems()
+        public async Task<IEnumerable<Product>> GetProducts()
         {
             var products = await this.shopDbContext.Products.ToListAsync();
 
