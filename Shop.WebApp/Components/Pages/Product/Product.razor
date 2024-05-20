@@ -1,0 +1,190 @@
+@page "/product/{Id}"
+@rendermode InteractiveServer
+@using Shop.Models.Dtos
+@using Shop.WebApp.Services.Contracts
+@inject IProductService ProductService
+@inject ILogger<Product> Logger
+@using Microsoft.AspNetCore.Components
+@using Shop.WebApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Shop.WebApp.Services.Contracts
+
+@if (product == null)
+{
+    <div class="spinner-border text-info" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <div class="container-fluid">
+        @if (!string.IsNullOrWhiteSpace(Message))
+        {
+            <div class="alert alert-warning" role="alert">
+                @Message
+            </div>
+        }
+        <div class="card m-auto">
+            <h4 class="card-header">@product.Name</h4>
+            <div class="row">
+                <div class="col  m-md-auto">
+                    <div class="card-body">
+                        <img class="card-img img-fluid img-thumbnail" src="@product.ImageURL" alt="@product.Name"/>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card-body">
+                        <p class="card-text">@product.Description</p>
+                        <div class="container-fluid">
+                            <EditForm Model="product" OnSubmit="UpdateProduct" class="form" FormName="product">
+                                <div class="row mb-auto">
+                                    <div class="input-group">
+                                        <div class="col">
+                                            <div class="input-group-text">Name</div>
+                                        </div>
+                                        <div class="col">
+                                            @if (EditMode == true)
+                                            {
+                                                <InputText type="text" class="form-control" @bind-Value="@product.Name"/>
+                                            }
+                                            else
+                                            {
+                                                <span class="form-control">@product.Name</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-auto">
+                                    <div class="input-group">
+                                        <div class="col">
+                                            <div class="input-group-text">Price</div>
+                                        </div>
+                                        <div class="col">
+                                            @if (EditMode == true)
+                                            {
+                                                <InputNumber type="decimal" class="form-control" @bind-Value="product.Price"/>
+                                            }
+                                            else
+                                            {
+                                                <span class="form-control">@product.Price.ToString("C")</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-auto">
+                                    <div class="input-group">
+                                        <div class="col">
+                                            <div class="input-group-text">Quantity</div>
+                                        </div>
+                                        <div class="col">
+                                            @if (EditMode == true)
+                                            {
+                                                <InputNumber type="number" class="form-control" @bind-Value="product.Quantity"/>
+                                            }
+                                            else
+                                            {
+                                                <span class="form-control">@product.Quantity</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-auto">
+                                    <div class="input-group">
+                                        <div class="col">
+                                            <div class="input-group-text">Category</div>
+                                        </div>
+                                        <div class="col">
+                                            <span class="form-control">@product.CategoryName</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (EditMode == true)
+                                {
+                                    <button class="btn btn-success mt-3" @onclick="UpdateProduct">Save Changes</button>
+                                }
+                            </EditForm>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label h5">Quantity</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="quantity" min="1" max="@product.Quantity" value="1">
+                                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <AuthorizeView Roles="Admin, Staff">
+                <div class="card-footer">
+                    <h5 class="card-title text-danger">Administrative actions</h5>
+                    <div class="container">
+                        <button class="btn btn-primary" @onclick="() => EditMode = true">Edit</button>
+                        <button class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </AuthorizeView>
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public string Id { get; set; }
+
+    [SupplyParameterFromForm]
+    public ProductDto product { get; set; }
+
+    [SupplyParameterFromQuery]
+    private bool? EditMode { get; set; } = false;
+
+    private string? Message { get; set; }
+
+    private async void UpdateProduct()
+    {
+        // Log all properties of the product object
+        Logger.LogInformation("Product submitted: {product}", product);
+
+        // Debug Log each property of the product object
+        foreach (var property in product.GetType().GetProperties())
+        {
+            Logger.LogDebug("{property}: {value}", property.Name, property.GetValue(product));
+        }
+
+        // Call the service to update the product
+        try
+        {
+            var result = await ProductService.UpdateProduct(product);
+            // If the result is not null, the product was updated successfully
+            if (result != null)
+            {
+                Message = "Product updated successfully";
+                product = result; // Update the product with the returned result
+            }
+            else
+            {
+                Message = "Product update failed";
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception and set the message
+            Logger.LogError(ex, $"Product update failed: {ex.Message}");
+            Message = $"Product update failed: {ex.Message}";
+        }
+
+        // Set the EditMode to false
+        EditMode = false;
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await ProductService.GetProduct(int.Parse(Id));
+    }
+}

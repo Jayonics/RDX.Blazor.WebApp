@@ -62,7 +62,7 @@ namespace Shop.API.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
             var product = await this.productRepository.GetProduct(id);
@@ -81,8 +81,8 @@ namespace Shop.API.Controllers
             return Ok(productDto);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, ProductDto productDto)
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<ProductDto>> UpdateProduct(int id, ProductDto productDto)
         {
             if (id != productDto.Id)
             {
@@ -93,7 +93,7 @@ namespace Shop.API.Controllers
 
             try
             {
-                await this.productRepository.UpdateProduct(product);
+                product = await this.productRepository.UpdateProduct(product);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -107,7 +107,14 @@ namespace Shop.API.Controllers
                 }
             }
 
-            return NoContent();
+            var productCategory = await this.productRepository.GetCategory(product.CategoryId);
+            if (productCategory == null)
+            {
+                return NotFound();
+            }
+
+            var updatedProductDto = product.ConvertToDto(productCategory);
+            return Ok(updatedProductDto);
         }
 
         private async Task<bool> ProductExists(int id)
@@ -115,5 +122,5 @@ namespace Shop.API.Controllers
             var product = await productRepository.GetProduct(id);
             return product != null;
         }
-    }   
+    }
 }

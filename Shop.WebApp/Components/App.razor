@@ -7,15 +7,15 @@
     <base href="/"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.css" integrity="sha256-WXhYjlKH6XSfghCwWybHstUHBc/H56awfW3B1fpSqQw=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" integrity="sha256-T/pr6kME0u2kGGg/ViYWhe1HvwCZUDnyflrWLVOTjS0=" crossorigin="anonymous">
-    <link href="_content/Blazor.Bootstrap/blazor.bootstrap.css" rel="stylesheet" />
+    <link href="_content/Blazor.Bootstrap/blazor.bootstrap.css" rel="stylesheet"/>
     <link rel="stylesheet" href="app.css"/>
     <link rel="stylesheet" href="Shop.WebApp.styles.css"/>
     <link rel="icon" type="image/png" href="favicon.png"/>
-    <HeadOutlet/>
+    <HeadOutlet @rendermode="RenderModeForPage" />
 </head>
 
 <body>
-<Routes/>
+<Routes @rendermode="RenderModeForPage" />
 <script src="_framework/blazor.web.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.js" integrity="sha256-nXxM3vVk1ByhwczQW2ZCRZedoIL4U5PuQKMoprvQKzE=" crossorigin="anonymous"></script>
 <!-- Add chart.js reference if chart components are used in your application. -->
@@ -27,7 +27,15 @@
 <script src="_content/Blazor.Bootstrap/blazor.bootstrap.js"></script>
 
 
-
 </body>
 
 </html>
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    private IComponentRenderMode? RenderModeForPage =>
+    HttpContext.Request.Path.StartsWithSegments("/Account")
+    ? null
+    : RenderMode.InteractiveServer;
+}
