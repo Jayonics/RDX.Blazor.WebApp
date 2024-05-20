@@ -38,10 +38,35 @@ namespace Shop.API.Repositories
             return products;
         }
 
-        public async Task UpdateProduct(Product product)
+        public async Task<Product> UpdateProduct(Product product)
         {
-            shopDbContext.Entry(product).State = EntityState.Modified;
-            await shopDbContext.SaveChangesAsync();
+            var existingProduct = await shopDbContext.Products.FindAsync(product.Id);
+            if (existingProduct == null)
+            {
+                throw new ArgumentException($"Product with ID {product.Id} not found.");
+            }
+
+            try
+            {
+                shopDbContext.Entry(existingProduct).CurrentValues.SetValues(product);
+            }
+            catch (ArgumentException argEx)
+            {
+                // Handle the exception (log it, rethrow it, etc.)
+                throw new Exception("An error occurred while updating the product.", argEx);
+            }
+
+            try
+            {
+                await shopDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and return null or throw an exception
+                throw new Exception("An error occurred while saving changes to the database.", ex);
+            }
+
+            return existingProduct;
         }
     }
 }

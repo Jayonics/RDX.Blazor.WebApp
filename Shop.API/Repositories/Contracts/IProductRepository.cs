@@ -8,6 +8,6 @@ namespace Shop.API.Repositories.Contracts
         Task<IEnumerable<ProductCategory>> GetCategories();
         Task<Product> GetProduct(int id);
         Task<ProductCategory> GetCategory(int id);
-        Task UpdateProduct(Product product);
+        Task<Product> UpdateProduct(Product product);
     }
 }
