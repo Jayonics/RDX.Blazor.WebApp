@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Blazor.Bootstrap" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.4" />
@@ -34,6 +35,103 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Shop.Models\Shop.Models.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\album-rtl\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\album\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\assets\brand\bootstrap-logo-white.svg" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\assets\brand\bootstrap-logo.svg" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\assets\dist\css\bootstrap.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\assets\dist\css\bootstrap.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\assets\dist\css\bootstrap.rtl.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\assets\dist\css\bootstrap.rtl.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\assets\dist\js\bootstrap.bundle.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\assets\dist\js\bootstrap.bundle.min.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\assets\js\color-modes.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\badges\badges.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\badges\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\blog-rtl\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\blog\blog.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\blog\blog.rtl.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\blog\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\breadcrumbs\breadcrumbs.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\breadcrumbs\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\buttons\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\carousel-rtl\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\carousel\carousel.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\carousel\carousel.rtl.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\carousel\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\cheatsheet-rtl\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\cheatsheet\cheatsheet.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\cheatsheet\cheatsheet.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\cheatsheet\cheatsheet.rtl.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\cheatsheet\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\checkout-rtl\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\checkout\checkout.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\checkout\checkout.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\checkout\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\cover\cover.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\cover\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\dashboard-rtl\dashboard.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\dashboard-rtl\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\dashboard\dashboard.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\dashboard\dashboard.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\dashboard\dashboard.rtl.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\dashboard\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\dropdowns\dropdowns.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\dropdowns\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\features\features.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\features\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\features\unsplash-photo-1.jpg" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\features\unsplash-photo-2.jpg" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\features\unsplash-photo-3.jpg" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\footers\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\grid\grid.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\grid\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\headers\headers.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\headers\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\heroes\bootstrap-docs.png" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\heroes\bootstrap-themes.png" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\heroes\heroes.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\heroes\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\jumbotrons\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\jumbotrons\jumbotrons.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\jumbotron\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\list-groups\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\list-groups\list-groups.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\masonry\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\modals\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\modals\modals.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\navbar-bottom\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\navbar-fixed\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\navbar-fixed\navbar-fixed.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\navbar-static\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\navbar-static\navbar-static.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\navbars-offcanvas\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\navbars-offcanvas\navbars-offcanvas.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\navbars\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\navbars\navbars.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\offcanvas-navbar\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\offcanvas-navbar\offcanvas-navbar.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\offcanvas-navbar\offcanvas-navbar.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\offcanvas\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\pricing\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\pricing\pricing.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\product\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\product\product.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\sidebars\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\sidebars\sidebars.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\sidebars\sidebars.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\sign-in\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\sign-in\sign-in.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\starter-template\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\sticky-footer-navbar\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\sticky-footer-navbar\sticky-footer-navbar.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\sticky-footer\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap-5.3.3-examples\sticky-footer\sticky-footer.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap\bootstrap.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap\bootstrap.min.css.map" />
     </ItemGroup>
 
 </Project>

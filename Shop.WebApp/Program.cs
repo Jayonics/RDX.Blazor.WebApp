@@ -15,6 +15,9 @@ namespace Shop.WebApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add the BlazorBoostrap Service to the container (NuGet package).
+            builder.Services.AddBlazorBootstrap();
+
             // Add services to the container.
             builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();

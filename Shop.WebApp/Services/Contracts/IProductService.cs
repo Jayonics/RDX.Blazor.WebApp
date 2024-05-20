@@ -1,4 +1,5 @@
-﻿using Shop.Models.Dtos;
+﻿using Microsoft.AspNetCore.Mvc;
+using Shop.Models.Dtos;
 
 namespace Shop.WebApp.Services.Contracts
 {
@@ -6,6 +7,6 @@ namespace Shop.WebApp.Services.Contracts
     {
         Task<IEnumerable<ProductDto>> GetProducts();
         Task<ProductDto> GetProduct(int id);
-        Task<bool> UpdateProduct(ProductDto product);
+        Task<ProductDto> UpdateProduct(ProductDto product);
     }
 }
