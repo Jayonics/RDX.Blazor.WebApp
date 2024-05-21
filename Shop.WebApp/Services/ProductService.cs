@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Shop.Models.Dtos;
+﻿using Shop.Models.Dtos;
 using Shop.WebApp.Services.Contracts;
 
 
