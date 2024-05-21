@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@inject AuthenticationStateProvider AuthenticationStateProvider
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -38,4 +39,12 @@
     HttpContext.Request.Path.StartsWithSegments("/Account")
     ? null
     : RenderMode.InteractiveServer;
+
+    [CascadingParameter]
+    private AuthenticationState? AuthenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    }
 }
