@@ -27,5 +27,32 @@ namespace Shop.API.Repositories
             var category = await _shopDbContext.ProductCategories.FindAsync(id);
             return category;
         }
+
+        public async Task<ProductCategory> AddProductCategory(ProductCategory productCategory)
+        {
+            _shopDbContext.ProductCategories.Add(productCategory);
+            await _shopDbContext.SaveChangesAsync();
+            return productCategory;
+        }
+
+        public async Task<ProductCategory> UpdateProductCategory(ProductCategory productCategory)
+        {
+            _shopDbContext.Entry(productCategory).State = EntityState.Modified;
+            await _shopDbContext.SaveChangesAsync();
+            return productCategory;
+        }
+
+        public async Task<bool> DeleteProductCategory(int id)
+        {
+            var productCategory = await _shopDbContext.ProductCategories.FindAsync(id);
+            if (productCategory == null)
+            {
+                return false;
+            }
+
+            _shopDbContext.ProductCategories.Remove(productCategory);
+            await _shopDbContext.SaveChangesAsync();
+            return true;
+        }
     }
 }

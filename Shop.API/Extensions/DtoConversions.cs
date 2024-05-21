@@ -103,5 +103,14 @@ namespace Shop.API.Extensions
                 Name = productCategory.Name
             };
         }
+
+        public static ProductCategory ConvertToEntity(this ProductCategoryDto productCategoryDto)
+        {
+            return new ProductCategory
+            {
+                Id = productCategoryDto.Id,
+                Name = productCategoryDto.Name
+            };
+        }
     }
 }

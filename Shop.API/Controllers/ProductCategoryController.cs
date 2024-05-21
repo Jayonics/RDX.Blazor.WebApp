@@ -96,5 +96,38 @@ namespace Shop.API.Controllers
                     "Error retrieving data from the database");
             }
         }
+
+        [HttpPost]
+        public async Task<ActionResult<ProductCategoryDto>> AddProductCategory(ProductCategoryDto productCategoryDto)
+        {
+            var productCategory = productCategoryDto.ConvertToEntity();
+            var addedProductCategory = await _productCategoryRepository.AddProductCategory(productCategory);
+            return Ok(addedProductCategory.ConvertToDto());
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<ProductCategoryDto>> UpdateProductCategory(int id, ProductCategoryDto productCategoryDto)
+        {
+            if (id != productCategoryDto.Id)
+            {
+                return BadRequest();
+            }
+
+            var productCategory = productCategoryDto.ConvertToEntity();
+            var updatedProductCategory = await _productCategoryRepository.UpdateProductCategory(productCategory);
+            return Ok(updatedProductCategory.ConvertToDto());
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> DeleteProductCategory(int id)
+        {
+            var result = await _productCategoryRepository.DeleteProductCategory(id);
+            if (!result)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
     }
 }
