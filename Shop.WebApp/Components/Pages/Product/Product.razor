@@ -147,8 +147,6 @@ else
     [SupplyParameterFromQuery]
     private bool? EditMode { get; set; } = false;
 
-    private bool IsProductDeleted { get; set; } = false;
-
     private string? Message { get; set; }
 
     [CascadingParameter]
@@ -184,16 +182,11 @@ else
                 Message = "Product deleted successfully";
                 Logger.LogInformation($"Product deletion result: {result}");
 
-                // Set the IsProductDeleted flag to true
-                IsProductDeleted = true;
-
                 // Trigger a UI refresh to update the message
                 await InvokeAsync(() => StateHasChanged());
 
                 // Wait for a duration before redirecting
-                await Task.Delay(TimeSpan.FromSeconds(5));
-
-                // Redirect to the /products page
+                await Task.Delay(TimeSpan.FromSeconds(3));
                 NavigationManager.NavigateTo("/products");
             }
             else
@@ -266,10 +259,27 @@ else
     {
         AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-        // Only retrieve the product if it has not been deleted
-        if (!IsProductDeleted)
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Pre-authorize the user before updating the product
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
+        if (!authorizationResult.Succeeded)
+        {
+            this.EditMode = false;
+        }
+
+
+        try
         {
             product = await ProductService.GetProduct(int.Parse(Id));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unable to fetch product details");
+            // Redirect to the /products page
+            NavigationManager.NavigateTo("/products");
         }
     }
 }
