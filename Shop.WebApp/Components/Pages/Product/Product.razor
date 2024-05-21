@@ -151,7 +151,9 @@ else
 
     private string? Message { get; set; }
 
-    private AuthenticationState AuthenticationState;
+    [CascadingParameter]
+    private AuthenticationState? AuthenticationState { get; set; }
+
 
     // Add Authorization restriction to this method
     [Authorize(Roles = "Admin, Staff")]
