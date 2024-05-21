@@ -29,110 +29,110 @@ else
                 @Message
             </div>
         }
-        <div class="card m-auto">
-            <h4 class="card-header">@product.Name</h4>
-            <div class="row">
-                <div class="col  m-md-auto">
-                    <div class="card-body">
-                        <img class="card-img img-fluid img-thumbnail" src="@product.ImageURL" alt="@product.Name"/>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card-body">
-                        <p class="card-text">@product.Description</p>
-                        <div class="container-fluid">
-                            <EditForm Model="product" OnSubmit="UpdateProduct" class="form" FormName="product">
-                                <div class="row mb-auto">
-                                    <div class="input-group">
-                                        <div class="col">
-                                            <div class="input-group-text">Name</div>
-                                        </div>
-                                        <div class="col">
-                                            @if (EditMode == true)
-                                            {
-                                                <InputText type="text" class="form-control" @bind-Value="@product.Name"/>
-                                            }
-                                            else
-                                            {
-                                                <span class="form-control">@product.Name</span>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-auto">
-                                    <div class="input-group">
-                                        <div class="col">
-                                            <div class="input-group-text">Price</div>
-                                        </div>
-                                        <div class="col">
-                                            @if (EditMode == true)
-                                            {
-                                                <InputNumber type="decimal" class="form-control" @bind-Value="product.Price"/>
-                                            }
-                                            else
-                                            {
-                                                <span class="form-control">@product.Price.ToString("C")</span>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-auto">
-                                    <div class="input-group">
-                                        <div class="col">
-                                            <div class="input-group-text">Quantity</div>
-                                        </div>
-                                        <div class="col">
-                                            @if (EditMode == true)
-                                            {
-                                                <InputNumber type="number" class="form-control" @bind-Value="product.Quantity"/>
-                                            }
-                                            else
-                                            {
-                                                <span class="form-control">@product.Quantity</span>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-auto">
-                                    <div class="input-group">
-                                        <div class="col">
-                                            <div class="input-group-text">Category</div>
-                                        </div>
-                                        <div class="col">
-                                            <span class="form-control">@product.CategoryName</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                @if (EditMode == true)
-                                {
-                                    <button class="btn btn-success mt-3" @onclick="UpdateProduct">Save Changes</button>
-                                }
-                            </EditForm>
+            <div class="card m-auto">
+                <h4 class="card-header">@product.Name</h4>
+                <div class="row">
+                    <div class="col  m-md-auto">
+                        <div class="card-body">
+                            <img class="card-img img-fluid img-thumbnail" src="@product.ImageURL" alt="@product.Name"/>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <form>
-                            <div class="mb-3">
-                                <label for="quantity" class="form-label h5">Quantity</label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="quantity" min="1" max="@product.Quantity" value="1">
-                                    <button type="submit" class="btn btn-primary">Add to Cart</button>
-                                </div>
+                    <div class="col">
+                        <div class="card-body">
+                            <p class="card-text">@product.Description</p>
+                            <div class="container-fluid">
+                                <EditForm Model="product" OnSubmit="UpdateProduct" class="form" FormName="product">
+                                    <div class="row mb-auto">
+                                        <div class="input-group">
+                                            <div class="col">
+                                                <div class="input-group-text">Name</div>
+                                            </div>
+                                            <div class="col">
+                                                @if (EditMode == true)
+                                                {
+                                                    <InputText type="text" class="form-control" @bind-Value="@product.Name"/>
+                                                }
+                                                else
+                                                {
+                                                    <span class="form-control">@product.Name</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-auto">
+                                        <div class="input-group">
+                                            <div class="col">
+                                                <div class="input-group-text">Price</div>
+                                            </div>
+                                            <div class="col">
+                                                @if (EditMode == true)
+                                                {
+                                                    <InputNumber type="decimal" class="form-control" @bind-Value="product.Price"/>
+                                                }
+                                                else
+                                                {
+                                                    <span class="form-control">@product.Price.ToString("C")</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-auto">
+                                        <div class="input-group">
+                                            <div class="col">
+                                                <div class="input-group-text">Quantity</div>
+                                            </div>
+                                            <div class="col">
+                                                @if (EditMode == true)
+                                                {
+                                                    <InputNumber type="number" class="form-control" @bind-Value="product.Quantity"/>
+                                                }
+                                                else
+                                                {
+                                                    <span class="form-control">@product.Quantity</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-auto">
+                                        <div class="input-group">
+                                            <div class="col">
+                                                <div class="input-group-text">Category</div>
+                                            </div>
+                                            <div class="col">
+                                                <span class="form-control">@product.CategoryName</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if (EditMode == true)
+                                    {
+                                        <button class="btn btn-success mt-3" @onclick="UpdateProduct">Save Changes</button>
+                                    }
+                                </EditForm>
                             </div>
-                        </form>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="mb-3">
+                                    <label for="quantity" class="form-label h5">Quantity</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="quantity" min="1" max="@product.Quantity" value="1">
+                                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
+                <AuthorizeView Roles="Admin, Staff">
+                    <div class="card-footer">
+                        <h5 class="card-title text-danger">Administrative actions</h5>
+                        <div class="container">
+                            <button class="btn btn-primary" @onclick="() => EditMode = true">Edit</button>
+                            <button class="btn btn-danger" @onclick="() => DeleteProduct()">Delete</button>
+                        </div>
+                    </div>
+                </AuthorizeView>
             </div>
-            <AuthorizeView Roles="Admin, Staff">
-                <div class="card-footer">
-                    <h5 class="card-title text-danger">Administrative actions</h5>
-                    <div class="container">
-                        <button class="btn btn-primary" @onclick="() => EditMode = true">Edit</button>
-                        <button class="btn btn-danger" @onclick="() => DeleteProduct()">Delete</button>
-                    </div>
-                </div>
-            </AuthorizeView>
-        </div>
     </div>
 }
 
@@ -146,8 +146,6 @@ else
 
     [SupplyParameterFromQuery]
     private bool? EditMode { get; set; } = false;
-
-    private bool IsProductDeleted { get; set; } = false;
 
     private string? Message { get; set; }
 
@@ -182,16 +180,11 @@ else
                 Message = "Product deleted successfully";
                 Logger.LogInformation($"Product deletion result: {result}");
 
-                // Set the IsProductDeleted flag to true
-                IsProductDeleted = true;
-
                 // Trigger a UI refresh to update the message
                 await InvokeAsync(() => StateHasChanged());
 
                 // Wait for a duration before redirecting
-                await Task.Delay(TimeSpan.FromSeconds(5));
-
-                // Redirect to the /products page
+                await Task.Delay(TimeSpan.FromSeconds(3));
                 NavigationManager.NavigateTo("/products");
             }
             else
@@ -264,10 +257,27 @@ else
     {
         AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-        // Only retrieve the product if it has not been deleted
-        if (!IsProductDeleted)
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Pre-authorize the user before updating the product
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
+        if (!authorizationResult.Succeeded)
+        {
+            this.EditMode = false;
+        }
+
+
+        try
         {
             product = await ProductService.GetProduct(int.Parse(Id));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unable to fetch product details");
+            // Redirect to the /products page
+            NavigationManager.NavigateTo("/products");
         }
     }
 }
