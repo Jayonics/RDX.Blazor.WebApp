@@ -4,6 +4,7 @@
 @using Shop.WebApp.Services.Contracts
 @inject IProductService ProductService
 @inject ILogger<Product> Logger
+@inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Components
 @using Shop.WebApp.Services
 @using Microsoft.AspNetCore.Components.Authorization
@@ -124,7 +125,7 @@ else
                     <h5 class="card-title text-danger">Administrative actions</h5>
                     <div class="container">
                         <button class="btn btn-primary" @onclick="() => EditMode = true">Edit</button>
-                        <button class="btn btn-danger">Delete</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteProduct()">Delete</button>
                     </div>
                 </div>
             </AuthorizeView>
@@ -143,8 +144,50 @@ else
     [SupplyParameterFromQuery]
     private bool? EditMode { get; set; } = false;
 
+    private bool IsProductDeleted { get; set; } = false;
+
     private string? Message { get; set; }
 
+    private async void DeleteProduct()
+    {
+        // Log the pre-action state of the product object
+        Logger.LogDebug("Product to delete: {product}", product);
+
+        // Call the service to delete the product
+        try
+        {
+            var result = await ProductService.DeleteProduct(product.Id);
+            // If the result is true, the product was deleted successfully
+            if (result)
+            {
+                Message = "Product deleted successfully";
+                Logger.LogInformation($"Product deletion result: {result}");
+
+                // Set the IsProductDeleted flag to true
+                IsProductDeleted = true;
+
+                // Trigger a UI refresh to update the message
+                await InvokeAsync(() => StateHasChanged());
+
+                // Wait for a duration before redirecting
+                await Task.Delay(TimeSpan.FromSeconds(5));
+
+                // Redirect to the /products page
+                NavigationManager.NavigateTo("/products");
+            }
+            else
+            {
+                Message = "Product deletion failed";
+                Logger.LogError($"Product deletion failed: {result}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception and set the message
+            Logger.LogCritical(ex, $"Product delete failed: {ex.Message}");
+            Message = $"Product delete failed: {ex.Message}";
+        }
+    }
     private async void UpdateProduct()
     {
         // Log all properties of the product object
@@ -186,5 +229,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         product = await ProductService.GetProduct(int.Parse(Id));
+        // Only retrieve the product if it has not been deleted
+        if (!IsProductDeleted)
+        {
+            product = await ProductService.GetProduct(int.Parse(Id));
+        }
     }
 }
