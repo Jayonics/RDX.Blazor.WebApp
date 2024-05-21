@@ -41,6 +41,8 @@ builder.Services.AddDbContextPool<ShopDbContext>(options => {
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 // Add the user repository to the services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+// Add the product category repository to the services
+builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 
 // Build the application
 var app = builder.Build();

@@ -83,5 +83,25 @@ namespace Shop.API.Extensions
                         Admin = user.Admin,
                     }).ToList();
         }
+
+        // ProductCategory conversions
+        public static IEnumerable<ProductCategoryDto> ConvertToDto(this IEnumerable<ProductCategory> productCategories)
+        {
+            return (from productCategory in productCategories
+                    select new ProductCategoryDto
+                    {
+                        Id = productCategory.Id,
+                        Name = productCategory.Name
+                    }).ToList();
+        }
+
+        public static ProductCategoryDto ConvertToDto(this ProductCategory productCategory)
+        {
+            return new ProductCategoryDto
+            {
+                Id = productCategory.Id,
+                Name = productCategory.Name
+            };
+        }
     }
 }
