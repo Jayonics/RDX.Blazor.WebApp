@@ -94,5 +94,30 @@ namespace Shop.WebApp.Services
                 throw;
             }
         }
+
+        public async Task<ProductDto> AddProduct(ProductDto product)
+        {
+            try
+            {
+                var response = await this.httpClient.PostAsJsonAsync("api/Product", product);
+                if (response.IsSuccessStatusCode)
+                {
+                    logger.LogInformation($"Product added successfully {response.StatusCode}");
+                    return await response.Content.ReadFromJsonAsync<ProductDto>();
+                }
+                else
+                {
+                    logger.LogWarning($"Product add failed with status code {response.StatusCode}");
+                    // You can throw an exception or return null based on your error handling strategy
+                    throw new Exception($"Product add failed with status code {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log exception
+                logger.LogError(ex, "Error adding product");
+                throw;
+            }
+        }
     }
 }

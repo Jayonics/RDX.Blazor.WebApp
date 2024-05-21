@@ -145,5 +145,31 @@ namespace Shop.API.Controllers
 
             return NoContent();
         }
+
+        [HttpPost]
+        public async Task<ActionResult<ProductDto>> AddProduct(ProductDto productDto)
+        {
+            // Attempt to convert the DTO to an entity before adding it to the repository
+            // Return a 400 Bad Request status if the conversion fails
+            if (productDto.ConvertToEntity() != null)
+            {
+                try
+                {
+                    var product = await this.productRepository.AddProduct(productDto.ConvertToEntity());
+                    var productCategory = await this.productRepository.GetCategory(product.CategoryId);
+                    return Ok(product.ConvertToDto(productCategory));
+
+                }
+                catch (Exception exception)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                    exception.Message);
+                }
+            }
+            else
+            {
+                return BadRequest(productDto);
+            }
+        }
     }
 }

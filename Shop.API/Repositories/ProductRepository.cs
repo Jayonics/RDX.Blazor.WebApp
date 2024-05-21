@@ -9,10 +9,14 @@ namespace Shop.API.Repositories
     {
         private readonly ShopDbContext shopDbContext;
 
-        public ProductRepository(ShopDbContext shopDbContext)
+        private readonly ILogger _logger;
+
+        public ProductRepository(ShopDbContext shopDbContext, ILogger<ProductRepository> logger)
         {
+            _logger = logger;
             this.shopDbContext = shopDbContext;
         }
+
         public async Task<IEnumerable<ProductCategory>> GetCategories()
         {
             var categories = await this.shopDbContext.ProductCategories.ToListAsync();
@@ -89,6 +93,33 @@ namespace Shop.API.Repositories
             }
 
             return true;
+        }
+
+        public async Task<Product> AddProduct(Product product)
+        {
+            try
+            {
+                // Log a warning if the product ID is not 0 or null
+                if (product.Id is not 0)
+                {
+                    // Log a warning
+                    _logger.LogWarning(
+                                       $"The product ID must be equivalent to 0 or null to ensure a new ID is generated.\n " +
+                                       "The product ID was not 0 or null.");
+                }
+
+                // Strip the ID from the product to ensure a new ID is generated
+                product.Id = 0;
+
+                await shopDbContext.Products.AddAsync(product);
+                await shopDbContext.SaveChangesAsync();
+                return product;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and return null or throw an exception
+                throw new Exception("An error occurred while adding the product.", ex);
+            }
         }
     }
 }
