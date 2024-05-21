@@ -99,11 +99,22 @@ else
                                             <div class="input-group-text">Category</div>
                                         </div>
                                         <div class="col">
-                                            <span class="form-control">@product.CategoryName</span>
+                                            @if (EditMode == true)
+                                            {
+                                                <InputText type="number" class="form-control" @bind-value="product.CategoryName"/>
+                                            }
+                                            else
+                                            {
+                                                <span class="form-control">@product.CategoryName</span>
+                                            }
                                         </div>
                                     </div>
                                 </div>
-                                @if (EditMode == true)
+                                @if (AddMode == true)
+                                {
+                                    <button class="btn btn-success mt-3" @onclick="AddProduct">Add Product</button>
+                                }
+                                else if (EditMode == true)
                                 {
                                     <button class="btn btn-success mt-3" @onclick="UpdateProduct">Save Changes</button>
                                 }
@@ -146,6 +157,9 @@ else
 
     [SupplyParameterFromQuery]
     private bool? EditMode { get; set; } = false;
+
+    [SupplyParameterFromQuery]
+    private bool? AddMode { get; set; } = false;
 
     private string? Message { get; set; }
 
@@ -255,6 +269,38 @@ else
         await InvokeAsync(() => StateHasChanged());
     }
 
+    [Authorize(Roles = "Admin, Staff")]
+    public async void AddProduct()
+    {
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
+        if (!authorizationResult.Succeeded)
+        {
+            Message = "You are not authorized to add products.";
+            Logger.LogWarning("User is not authorized to add products.");
+            Logger.LogDebug("User Details: {user}", AuthenticationState.User);
+            return;
+        }
+
+        try
+        {
+            var result = await ProductService.AddProduct(product);
+            if (result != null)
+            {
+                Message = "Product added successfully";
+                product = result;
+            }
+            else
+            {
+                Message = "Product add failed";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"Product add failed: {ex.Message}");
+            Message = $"Product add failed: {ex.Message}";
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -267,19 +313,28 @@ else
         var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
         if (!authorizationResult.Succeeded)
         {
+            this.AddMode = false;
             this.EditMode = false;
         }
 
 
-        try
+        if (AddMode == true)
         {
-            product = await ProductService.GetProduct(int.Parse(Id));
+            product = new ProductDto();
+            EditMode = true;
         }
-        catch (Exception ex)
+        else
         {
-            Logger.LogError(ex, "Unable to fetch product details");
-            // Redirect to the /products page
-            NavigationManager.NavigateTo("/products");
+            try
+            {
+                product = await ProductService.GetProduct(int.Parse(Id));
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Unable to fetch product details");
+                // Redirect to the /products page
+                NavigationManager.NavigateTo("/products");
+            }
         }
     }
 }
