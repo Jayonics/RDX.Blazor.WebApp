@@ -53,6 +53,22 @@ namespace Shop.WebApp
 
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
+            builder.Services.AddCascadingAuthenticationState();
+            // Admin only
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+            });
+            // Staff only
+            builder.Services.AddAuthorization(options => {
+                options.AddPolicy("Staff", policy => policy.RequireRole("Staff"));
+            });
+            // Admin or Staff
+            builder.Services.AddAuthorization(options => {
+                options.AddPolicy("AdminOrStaff", policy => policy.RequireRole("Admin", "Staff"));
+            });
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
