@@ -9,5 +9,6 @@ namespace Shop.API.Repositories.Contracts
         Task<Product> GetProduct(int id);
         Task<ProductCategory> GetCategory(int id);
         Task<Product> UpdateProduct(Product product);
+        Task<bool> DeleteProduct(int id);
     }
 }
