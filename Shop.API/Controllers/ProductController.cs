@@ -122,5 +122,28 @@ namespace Shop.API.Controllers
             var product = await productRepository.GetProduct(id);
             return product != null;
         }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> DeleteProduct(int id)
+        {
+            var product = await this.productRepository.GetProduct(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                await this.productRepository.DeleteProduct(id);
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                "Error deleting data from the database");
+            }
+
+            return NoContent();
+        }
     }
 }

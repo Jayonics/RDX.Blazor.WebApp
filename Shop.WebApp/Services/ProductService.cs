@@ -70,5 +70,29 @@ namespace Shop.WebApp.Services
                 throw;
             }
         }
+
+        public async Task<bool> DeleteProduct(int id)
+        {
+            try
+            {
+                var response = await this.httpClient.DeleteAsync($"api/Product/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    logger.LogInformation($"Product deleted successfully {response.StatusCode}");
+                    return true;
+                }
+                else
+                {
+                    logger.LogWarning($"Product delete failed with status code {response.StatusCode}");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log exception
+                logger.LogError(ex, "Error deleting product");
+                throw;
+            }
+        }
     }
 }

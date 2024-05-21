@@ -68,5 +68,27 @@ namespace Shop.API.Repositories
 
             return existingProduct;
         }
+
+        public async Task<bool> DeleteProduct(int id)
+        {
+            var product = await shopDbContext.Products.FindAsync(id);
+            if (product == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                shopDbContext.Products.Remove(product);
+                await shopDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and return false or throw an exception
+                throw new Exception("An error occurred while deleting the product.", ex);
+            }
+
+            return true;
+        }
     }
 }
