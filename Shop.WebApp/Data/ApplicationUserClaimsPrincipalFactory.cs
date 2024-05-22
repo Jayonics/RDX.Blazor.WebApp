@@ -18,10 +18,7 @@ namespace Shop.WebApp.Data
             var identity = await base.GenerateClaimsAsync(user);
             var roles = await UserManager.GetRolesAsync(user);
 
-            foreach (var role in roles)
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Role, role));
-            }
+            foreach (var role in roles) identity.AddClaim(new Claim(ClaimTypes.Role, role));
 
             return identity;
         }

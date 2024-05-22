@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Shop.API.Extensions;
 using Shop.API.Repositories.Contracts;
 using Shop.Models.Dtos;
@@ -7,13 +6,13 @@ using Shop.Models.Dtos;
 namespace Shop.API.Controllers
 {
     /// <summary>
-    /// Controller for handling product-related requests.
+    ///     Controller for handling product-related requests.
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository userRepository;
+        readonly IUserRepository userRepository;
 
         public UserController(IUserRepository userRepository)
         {
@@ -21,7 +20,7 @@ namespace Shop.API.Controllers
         }
 
         /// <summary>
-        /// Returns all users in the Users table.
+        ///     Returns all users in the Users table.
         /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
@@ -30,21 +29,18 @@ namespace Shop.API.Controllers
             try
             {
                 // Fetch all users from the repository
-                var users = await this.userRepository.GetUsers();
+                var users = await userRepository.GetUsers();
 
                 // If the users are null, return a NotFound status
                 if (users == null)
                 {
                     return NotFound();
                 }
-                else
-                {
-                    // Convert the users to DTOs
-                    var userDtos = users.ConvertToDto();
+                // Convert the users to DTOs
+                var userDtos = users.ConvertToDto();
 
-                    // Return the converted DTOs with an Ok status
-                    return Ok(userDtos);
-                }
+                // Return the converted DTOs with an Ok status
+                return Ok(userDtos);
             }
             catch (Exception)
             {

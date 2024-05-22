@@ -1,16 +1,10 @@
 @page "/product/{Id}"
-@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
-@using Shop.Models.Dtos
 @using Shop.WebApp.Services.Contracts
+@rendermode InteractiveServer
 @inject IProductService ProductService
 @inject ILogger<Product> Logger
 @inject NavigationManager NavigationManager
-@using Microsoft.AspNetCore.Components
-@using Shop.WebApp.Services
-@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Components.Forms
-@using Shop.WebApp.Services.Contracts
 @inject IAuthorizationService AuthorizationService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -250,7 +244,7 @@ else
             if (result != null)
             {
                 Message = "Product updated successfully";
-                product = result; // Update the product with the returned result
+                product = result;// Update the product with the returned result
             }
             else
             {
@@ -313,8 +307,8 @@ else
         var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
         if (!authorizationResult.Succeeded)
         {
-            this.AddMode = false;
-            this.EditMode = false;
+            AddMode = false;
+            EditMode = false;
         }
 
 

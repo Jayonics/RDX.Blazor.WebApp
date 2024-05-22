@@ -1,5 +1,4 @@
 ﻿@page "/products"
-@using Shop.Models.Dtos
 @using Shop.WebApp.Services.Contracts
 @inject IProductService ProductService
 @inject NavigationManager NavigationManager
@@ -20,8 +19,12 @@ else
                     Admin Actions
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                    <li><a class="dropdown-item" href="#">Add a category</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li>
+                        <a class="dropdown-item" href="#">Add a category</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">Another action</a>
+                    </li>
                 </ul>
             </div>
         </AuthorizeView>
@@ -64,14 +67,11 @@ else
         ProductList = await ProductService.GetProducts();
     }
 
-    protected IOrderedEnumerable<IGrouping<int, ProductDto>> GetGroupedProductsByCategory()
-    {
-        return from product in ProductList
-               group product by product.CategoryId
-               into productByCategoryGroup
-               orderby productByCategoryGroup.Key
-               select productByCategoryGroup;
-    }
+    protected IOrderedEnumerable<IGrouping<int, ProductDto>> GetGroupedProductsByCategory() => from product in ProductList
+                                                                                               group product by product.CategoryId
+                                                                                               into productByCategoryGroup
+                                                                                               orderby productByCategoryGroup.Key
+                                                                                               select productByCategoryGroup;
 
     protected string GetCategoryName(IGrouping<int, ProductDto> groupedProductDtos)
     {

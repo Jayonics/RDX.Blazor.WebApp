@@ -7,9 +7,10 @@ namespace Shop.API.Repositories
 {
     public class ProductRepository : IProductRepository
     {
-        private readonly ShopDbContext shopDbContext;
 
-        private readonly ILogger _logger;
+        readonly ILogger _logger;
+
+        readonly ShopDbContext shopDbContext;
 
         public ProductRepository(ShopDbContext shopDbContext, ILogger<ProductRepository> logger)
         {
@@ -19,7 +20,7 @@ namespace Shop.API.Repositories
 
         public async Task<IEnumerable<ProductCategory>> GetCategories()
         {
-            var categories = await this.shopDbContext.ProductCategories.ToListAsync();
+            var categories = await shopDbContext.ProductCategories.ToListAsync();
             return categories;
         }
 
@@ -37,7 +38,7 @@ namespace Shop.API.Repositories
 
         public async Task<IEnumerable<Product>> GetProducts()
         {
-            var products = await this.shopDbContext.Products.ToListAsync();
+            var products = await shopDbContext.Products.ToListAsync();
 
             return products;
         }
@@ -45,10 +46,7 @@ namespace Shop.API.Repositories
         public async Task<Product> UpdateProduct(Product product)
         {
             var existingProduct = await shopDbContext.Products.FindAsync(product.Id);
-            if (existingProduct == null)
-            {
-                throw new ArgumentException($"Product with ID {product.Id} not found.");
-            }
+            if (existingProduct == null) throw new ArgumentException($"Product with ID {product.Id} not found.");
 
             try
             {
@@ -76,10 +74,7 @@ namespace Shop.API.Repositories
         public async Task<bool> DeleteProduct(int id)
         {
             var product = await shopDbContext.Products.FindAsync(id);
-            if (product == null)
-            {
-                return false;
-            }
+            if (product == null) return false;
 
             try
             {
@@ -101,12 +96,10 @@ namespace Shop.API.Repositories
             {
                 // Log a warning if the product ID is not 0 or null
                 if (product.Id is not 0)
-                {
-                    // Log a warning
+                // Log a warning
                     _logger.LogWarning(
-                                       $"The product ID must be equivalent to 0 or null to ensure a new ID is generated.\n " +
-                                       "The product ID was not 0 or null.");
-                }
+                    "The product ID must be equivalent to 0 or null to ensure a new ID is generated.\n " +
+                    "The product ID was not 0 or null.");
 
                 // Strip the ID from the product to ensure a new ID is generated
                 product.Id = 0;

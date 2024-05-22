@@ -1,5 +1,4 @@
 ﻿@page "/Account/LoginWith2fa"
-
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
 @using Shop.WebApp.Data
@@ -51,13 +50,13 @@
     private ApplicationUser user = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private InputModel Input { get; } = new();
 
     [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
+    private string? ReturnUrl { get; }
 
     [SupplyParameterFromQuery]
-    private bool RememberMe { get; set; }
+    private bool RememberMe { get; }
 
     protected override async Task OnInitializedAsync()
     {

@@ -59,9 +59,9 @@ if (app.Environment.IsDevelopment())
 
 // Allow Web project CORS
 app.UseCors(policy =>
-    policy.WithOrigins("https://localhost:7138", "http://localhost:7138")
-    .AllowAnyMethod()
-    .WithHeaders(HeaderNames.ContentType)
+policy.WithOrigins("https://localhost:7138", "http://localhost:7138")
+.AllowAnyMethod()
+.WithHeaders(HeaderNames.ContentType)
 );
 
 // Use HTTPS redirection

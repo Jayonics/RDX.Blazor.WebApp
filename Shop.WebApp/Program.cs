@@ -42,9 +42,9 @@ namespace Shop.WebApp
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddSignInManager()
-                .AddDefaultTokenProviders();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddSignInManager()
+            .AddDefaultTokenProviders();
 
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
@@ -55,17 +55,16 @@ namespace Shop.WebApp
 
             builder.Services.AddCascadingAuthenticationState();
             // Admin only
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+            builder.Services.AddAuthorization(options => {
+                options.AddPolicy("Admin", configurePolicy: policy => policy.RequireRole("Admin"));
             });
             // Staff only
             builder.Services.AddAuthorization(options => {
-                options.AddPolicy("Staff", policy => policy.RequireRole("Staff"));
+                options.AddPolicy("Staff", configurePolicy: policy => policy.RequireRole("Staff"));
             });
             // Admin or Staff
             builder.Services.AddAuthorization(options => {
-                options.AddPolicy("AdminOrStaff", policy => policy.RequireRole("Admin", "Staff"));
+                options.AddPolicy("AdminOrStaff", configurePolicy: policy => policy.RequireRole("Admin", "Staff"));
             });
 
 

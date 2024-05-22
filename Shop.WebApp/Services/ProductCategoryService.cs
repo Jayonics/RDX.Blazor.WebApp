@@ -5,9 +5,9 @@ namespace Shop.WebApp.Services
 {
     public class ProductCategoryService : IProductCategoryService
     {
-        private readonly HttpClient httpClient;
+        readonly HttpClient httpClient;
 
-        private readonly ILogger<ProductCategoryService> logger;
+        readonly ILogger<ProductCategoryService> logger;
 
         public ProductCategoryService(HttpClient httpClient, ILogger<ProductCategoryService> logger)
         {
@@ -17,33 +17,14 @@ namespace Shop.WebApp.Services
 
         public async Task<IEnumerable<ProductCategoryDto>> GetProductCategories()
         {
-            try
-            {
-                var productCategories = await this.httpClient.GetFromJsonAsync<IEnumerable<ProductCategoryDto>>("api/ProductCategory");
-                return productCategories;
-            }
-            catch (Exception)
-            {
-                // Log exception
-                throw;
-            }
+            var productCategories = await httpClient.GetFromJsonAsync<IEnumerable<ProductCategoryDto>>("api/ProductCategory");
+            return productCategories;
         }
         public async Task<ProductCategoryDto> GetProductCategory(int id)
         {
-            try
-            {
-                var productCategory = await this.httpClient.GetFromJsonAsync<ProductCategoryDto>($"api/ProductCategory/{id}");
-                if (productCategory == null)
-                {
-                    throw new Exception("Product category not found");
-                }
-                return productCategory;
-            }
-            catch (Exception)
-            {
-                // Log exception
-                throw;
-            }
+            var productCategory = await httpClient.GetFromJsonAsync<ProductCategoryDto>($"api/ProductCategory/{id}");
+            if (productCategory == null) throw new Exception("Product category not found");
+            return productCategory;
         }
     }
 }

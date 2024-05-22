@@ -7,18 +7,19 @@ namespace Shop.API.Repositories
 {
     public class ProductCategoryRepository : IProductCategoryRepository
     {
-        private readonly ShopDbContext _shopDbContext;
-        private readonly ILogger _logger;
+        readonly ILogger _logger;
+
+        readonly ShopDbContext _shopDbContext;
 
         public ProductCategoryRepository(ShopDbContext shopDbContext, ILogger<ProductCategoryRepository> logger)
         {
             _logger = logger;
-            this._shopDbContext = shopDbContext;
+            _shopDbContext = shopDbContext;
         }
 
         public async Task<IEnumerable<ProductCategory>> GetProductCategories()
         {
-            var categories = await this._shopDbContext.ProductCategories.ToListAsync();
+            var categories = await _shopDbContext.ProductCategories.ToListAsync();
             return categories;
         }
 
@@ -45,10 +46,7 @@ namespace Shop.API.Repositories
         public async Task<bool> DeleteProductCategory(int id)
         {
             var productCategory = await _shopDbContext.ProductCategories.FindAsync(id);
-            if (productCategory == null)
-            {
-                return false;
-            }
+            if (productCategory == null) return false;
 
             _shopDbContext.ProductCategories.Remove(productCategory);
             await _shopDbContext.SaveChangesAsync();

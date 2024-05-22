@@ -1,5 +1,4 @@
 ﻿@page "/Account/ConfirmEmailChange"
-
 @using System.Text
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
@@ -23,13 +22,13 @@
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromQuery]
-    private string? UserId { get; set; }
+    private string? UserId { get; }
 
     [SupplyParameterFromQuery]
-    private string? Email { get; set; }
+    private string? Email { get; }
 
     [SupplyParameterFromQuery]
-    private string? Code { get; set; }
+    private string? Code { get; }
 
     protected override async Task OnInitializedAsync()
     {
