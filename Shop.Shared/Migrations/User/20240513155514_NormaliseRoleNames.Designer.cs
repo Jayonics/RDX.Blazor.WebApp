@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Shop.WebApp.Data;
+using Shop.Shared.Data;
 
 #nullable disable
 
 namespace Shop.WebApp.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240513154658_Initial")]
-    partial class Initial
+    [DbContext(typeof(UserDbContext))]
+    [Migration("20240513155514_NormaliseRoleNames")]
+    partial class NormaliseRoleNames
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,19 +56,19 @@ namespace Shop.WebApp.Migrations
                         {
                             Id = "1",
                             Name = "Admin",
-                            NormalizedName = "ADMIN"
+                            NormalizedName = "Admin"
                         },
                         new
                         {
                             Id = "2",
                             Name = "Staff",
-                            NormalizedName = "STAFF"
+                            NormalizedName = "Staff"
                         },
                         new
                         {
                             Id = "3",
                             Name = "Customer",
-                            NormalizedName = "CUSTOMER"
+                            NormalizedName = "Customer"
                         });
                 });
 

@@ -1,9 +1,8 @@
 ﻿@page "/Account/Login"
-
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
-@using Shop.WebApp.Data
+@using Shop.Shared.Entities
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Login> Logger
@@ -100,7 +99,8 @@
         {
             RedirectManager.RedirectTo(
             "Account/LoginWith2fa",
-            new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+            new Dictionary<string, object?>
+            { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
         }
         else if (result.IsLockedOut)
         {

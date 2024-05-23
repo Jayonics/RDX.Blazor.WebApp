@@ -1,9 +1,8 @@
 ﻿@page "/Account/ConfirmEmail"
-
 @using System.Text
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-@using Shop.WebApp.Data
+@using Shop.Shared.Entities
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
@@ -21,10 +20,10 @@
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromQuery]
-    private string? UserId { get; set; }
+    private string? UserId { get; }
 
     [SupplyParameterFromQuery]
-    private string? Code { get; set; }
+    private string? Code { get; }
 
     protected override async Task OnInitializedAsync()
     {

@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Shop.API.Data;
+using Shop.Shared.Data;
 
 #nullable disable
 
 namespace Shop.API.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    [Migration("20240501093959_AdminFlag")]
-    partial class AdminFlag
+    [Migration("20240424142822_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -387,9 +387,6 @@ namespace Shop.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Admin")
-                        .HasColumnType("bit");
-
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -402,20 +399,12 @@ namespace Shop.API.Migrations
                         new
                         {
                             Id = 1,
-                            Admin = false,
                             UserName = "Bob"
                         },
                         new
                         {
                             Id = 2,
-                            Admin = false,
                             UserName = "Sarah"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Admin = true,
-                            UserName = "Admin"
                         });
                 });
 #pragma warning restore 612, 618

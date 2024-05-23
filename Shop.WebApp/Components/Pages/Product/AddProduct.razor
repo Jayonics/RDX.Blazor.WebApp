@@ -1,0 +1,169 @@
+@page "/addproduct"
+@using Shop.Models.Requests
+@using Shop.WebApp.Services.Contracts
+@rendermode InteractiveServer
+@inject IProductService ProductService
+@inject IProductCategoryService ProductCategoryService
+@inject ILogger<Product> Logger
+@inject NavigationManager NavigationManager
+
+
+<div class="container-fluid">
+    <div class="card m-auto">
+        <h4 class="card-header">Header Placeholder</h4>
+        <div class="row">
+            <div class="col  m-md-auto">
+                <div class="card-body">
+                    <img class="card-img img-fluid img-thumbnail" src="NA" alt="alt"/>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card-body">
+                    <EditForm Model="product" OnValidSubmit="() => AddNewProduct()" class="form" FormName="product">
+                        <DataAnnotationsValidator/>
+                        <ValidationSummary/>
+                        <div class="container">
+                            <div class="row mb-auto">
+                                <div class="input-group">
+                                    <div class="col">
+                                        <div class="input-group-text">Name</div>
+                                    </div>
+                                    <div class="col">
+                                        <InputText type="text" class="form-control" @bind-Value="@product.Name"/>
+                                        <ValidationMessage For="@(() => product.Name)" class="text-danger"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-auto">
+                                <div class="input-group">
+                                    <div class="col">
+                                        <div class="input-group-text">Description</div>
+                                    </div>
+                                    <div class="col">
+                                        <InputText type="text" class="form-control" @bind-Value="@product.Description"/>
+                                        <ValidationMessage For="@(() => product.Description)" class="text-danger"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-auto">
+                                <div class="input-group">
+                                    <div class="col">
+                                        <div class="input-group-text">Price</div>
+                                    </div>
+                                    <div class="col">
+                                        <InputNumber type="decimal" class="form-control" @bind-Value="product.Price"/>
+                                        <ValidationMessage For="@(() => product.Price)" class="text-danger"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-auto">
+                                <div class="input-group">
+                                    <div class="col">
+                                        <div class="input-group-text">Quantity</div>
+                                    </div>
+                                    <div class="col">
+                                        <InputNumber type="number" class="form-control" @bind-Value="product.Quantity"/>
+                                        <ValidationMessage For="@(() => product.Quantity)" class="text-danger"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-auto">
+                                <div class="input-group">
+                                    <div class="col">
+                                        <div class="input-group-text">Category</div>
+                                    </div>
+                                    <div class="col">
+                                        <InputSelect class="form-control" @bind-Value="product.CategoryId">
+                                            @if (productCategories == null)
+                                            {
+                                                <option>Loading...</option>
+                                            }
+                                            else
+                                            {
+                                                @foreach (var category in productCategories)
+                                                {
+                                                    <option value="@category.Id">@category.Name</option>
+                                                }
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success mt-3">Add Product</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public NewProductDto product { get; set; }
+
+    [Parameter]
+    public IEnumerable<ProductCategoryDto> productCategories { get; set; }
+
+    private string? Message { get; set; }
+
+    public async void AddNewProduct()
+    {
+
+        // Attempt to convert the NewProductDto to a ProductDto
+        // var product = new NewProductDto
+        // {
+        //     Name = product.Name,
+        //     Price = product.Price,
+        //     Quantity = product.Quantity,
+        //     // If the product.CategoryId is not valid, select the first category
+        //     ImageURL = "NA",
+        //     Description = product.Description,
+        //     CategoryId = (product.CategoryId == 0) ? productCategories.First().Id : product.CategoryId
+        //
+        // };
+
+        product.CategoryId = (product.CategoryId == 0) ? productCategories.First().Id : product.CategoryId;
+        product.ImageURL = "https://via.placeholder.com/150";
+
+        var result = await ProductService.AddProduct(product);
+        if (result != null)
+        {
+            Message = "Product added successfully";
+        }
+        else
+        {
+            Message = "Product add failed";
+        }
+    }
+
+    public async Task<IEnumerable<ProductCategoryDto>> GetProductCategories()
+    {
+        return await ProductCategoryService.GetProductCategories();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = new NewProductDto();
+
+
+        productCategories = await GetProductCategories();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        {
+            try
+            {
+                productCategories = await GetProductCategories();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Unable to fetch product details");
+                // Redirect to the /products page
+                NavigationManager.NavigateTo("/products");
+            }
+        }
+    }
+}

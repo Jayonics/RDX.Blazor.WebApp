@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shop.WebApp.Components;
 using Shop.WebApp.Components.Account;
-using Shop.WebApp.Data;
+using Shop.Shared.Data;
+using Shop.Shared.Entities;
 using Shop.WebApp.Services;
 using Shop.WebApp.Services.Contracts;
 
@@ -37,35 +38,35 @@ namespace Shop.WebApp
                 _ => builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")
             };
 
-            builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
+            builder.Services.AddDbContextPool<UserDbContext>(options =>
             options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddSignInManager()
-                .AddDefaultTokenProviders();
+            .AddEntityFrameworkStores<UserDbContext>()
+            .AddSignInManager()
+            .AddDefaultTokenProviders();
 
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7015/") });
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
 
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
             builder.Services.AddCascadingAuthenticationState();
             // Admin only
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+            builder.Services.AddAuthorization(options => {
+                options.AddPolicy("Admin", configurePolicy: policy => policy.RequireRole("Admin"));
             });
             // Staff only
             builder.Services.AddAuthorization(options => {
-                options.AddPolicy("Staff", policy => policy.RequireRole("Staff"));
+                options.AddPolicy("Staff", configurePolicy: policy => policy.RequireRole("Staff"));
             });
             // Admin or Staff
             builder.Services.AddAuthorization(options => {
-                options.AddPolicy("AdminOrStaff", policy => policy.RequireRole("Admin", "Staff"));
+                options.AddPolicy("AdminOrStaff", configurePolicy: policy => policy.RequireRole("Admin", "Staff"));
             });
 
 

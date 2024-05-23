@@ -1,13 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Shop.API.Entities;
+using Shop.Shared.Entities;
 
-namespace Shop.API.Data
+namespace Shop.Shared.Data
 {
-    public class ShopDbContext:DbContext
+    public class ShopDbContext : DbContext
     {
-        public ShopDbContext(DbContextOptions<ShopDbContext> options):base(options)
+        public ShopDbContext(DbContextOptions<ShopDbContext> options) : base(options)
         {
         }
+
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductCategory> ProductCategories { get; set; }
+        public DbSet<ApplicationUser> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -260,21 +266,21 @@ namespace Shop.API.Data
                 CategoryId = 4
             });
 
-            //Add users
-            modelBuilder.Entity<User>().HasData(new User
+            /*//Add users
+            modelBuilder.Entity<ApplicationUser>().HasData(new ApplicationUser
             {
                 Id = 1,
                 UserName = "Bob"
 
             });
-            modelBuilder.Entity<User>().HasData(new User
+            modelBuilder.Entity<ApplicationUser>().HasData(new ApplicationUser
             {
                 Id = 2,
                 UserName = "Sarah"
 
             });
             // Add an Admin user
-            modelBuilder.Entity<User>().HasData(new User
+            modelBuilder.Entity<ApplicationUser>().HasData(new ApplicationUser
             {
                 Id = 3,
                 UserName = "Admin",
@@ -293,7 +299,7 @@ namespace Shop.API.Data
                 Id = 2,
                 UserId = 2
 
-            });
+            });*/
             //Add Product Categories
             modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
             {
@@ -316,12 +322,5 @@ namespace Shop.API.Data
                 Name = "Shoes"
             });
         }
-
-        public DbSet<Cart> Carts { get; set; }
-        public DbSet<CartItem> CartItems {  get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<ProductCategory> ProductCategories { get; set; }
-        public DbSet<User> Users { get; set; }
-
     }
 }

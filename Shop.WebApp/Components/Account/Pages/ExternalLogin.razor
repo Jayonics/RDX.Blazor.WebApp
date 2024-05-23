@@ -1,12 +1,11 @@
 ﻿@page "/Account/ExternalLogin"
-
 @using System.ComponentModel.DataAnnotations
 @using System.Security.Claims
 @using System.Text
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-@using Shop.WebApp.Data
+@using Shop.Shared.Entities
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
@@ -56,16 +55,16 @@
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private InputModel Input { get; } = new();
 
     [SupplyParameterFromQuery]
-    private string? RemoteError { get; set; }
+    private string? RemoteError { get; }
 
     [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
+    private string? ReturnUrl { get; }
 
     [SupplyParameterFromQuery]
-    private string? Action { get; set; }
+    private string? Action { get; }
 
     private string? ProviderDisplayName => externalLoginInfo.ProviderDisplayName;
 
@@ -104,8 +103,8 @@
         var result = await SignInManager.ExternalLoginSignInAsync(
         externalLoginInfo.LoginProvider,
         externalLoginInfo.ProviderKey,
-        isPersistent: false,
-        bypassTwoFactor: true);
+        false,
+        true);
 
         if (result.Succeeded)
         {
@@ -155,10 +154,12 @@
                 // If account confirmation is required, we need to show the link if we don't have a real email sender
                 if (UserManager.Options.SignIn.RequireConfirmedAccount)
                 {
-                    RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
+                    RedirectManager.RedirectTo("Account/RegisterConfirmation",
+                    new Dictionary<string, object?>
+                    { ["email"] = Input.Email });
                 }
 
-                await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
+                await SignInManager.SignInAsync(user, false, externalLoginInfo.LoginProvider);
                 RedirectManager.RedirectTo(ReturnUrl);
             }
         }

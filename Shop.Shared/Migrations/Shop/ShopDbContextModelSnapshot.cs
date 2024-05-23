@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Shop.API.Data;
+using Shop.Shared.Data;
 
 #nullable disable
 
@@ -376,7 +376,7 @@ namespace Shop.API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Shop.API.Entities.User", b =>
+            modelBuilder.Entity("Shop.API.Entities.ApplicationUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

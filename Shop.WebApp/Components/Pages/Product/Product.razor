@@ -1,16 +1,11 @@
 @page "/product/{Id}"
-@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
-@using Shop.Models.Dtos
 @using Shop.WebApp.Services.Contracts
+@rendermode InteractiveServer
 @inject IProductService ProductService
+@inject IProductCategoryService ProductCategoryService
 @inject ILogger<Product> Logger
 @inject NavigationManager NavigationManager
-@using Microsoft.AspNetCore.Components
-@using Shop.WebApp.Services
-@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Components.Forms
-@using Shop.WebApp.Services.Contracts
 @inject IAuthorizationService AuthorizationService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -99,7 +94,19 @@ else
                                             <div class="input-group-text">Category</div>
                                         </div>
                                         <div class="col">
-                                            <span class="form-control">@product.CategoryName</span>
+                                            @if (EditMode == true)
+                                            {
+                                                <InputSelect class="form-control" @bind-Value="product.CategoryId">
+                                                    @foreach (var category in productCategories)
+                                                    {
+                                                        <option value="@category.Id">@category.Name</option>
+                                                    }
+                                                </InputSelect>
+                                            }
+                                            else
+                                            {
+                                                <span class="form-control">@product.CategoryName</span>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -144,14 +151,20 @@ else
     [SupplyParameterFromForm]
     public ProductDto product { get; set; }
 
+    [Parameter]
+    public IEnumerable<ProductCategoryDto> productCategories { get; set; }
+
     [SupplyParameterFromQuery]
     private bool? EditMode { get; set; } = false;
 
-    private bool IsProductDeleted { get; set; } = false;
+    [SupplyParameterFromQuery]
+    private bool? AddMode { get; set; } = false;
 
     private string? Message { get; set; }
 
-    private AuthenticationState AuthenticationState;
+    [CascadingParameter]
+    private AuthenticationState? AuthenticationState { get; set; }
+
 
     // Add Authorization restriction to this method
     [Authorize(Roles = "Admin, Staff")]
@@ -182,16 +195,11 @@ else
                 Message = "Product deleted successfully";
                 Logger.LogInformation($"Product deletion result: {result}");
 
-                // Set the IsProductDeleted flag to true
-                IsProductDeleted = true;
-
                 // Trigger a UI refresh to update the message
                 await InvokeAsync(() => StateHasChanged());
 
                 // Wait for a duration before redirecting
-                await Task.Delay(TimeSpan.FromSeconds(5));
-
-                // Redirect to the /products page
+                await Task.Delay(TimeSpan.FromSeconds(3));
                 NavigationManager.NavigateTo("/products");
             }
             else
@@ -241,7 +249,7 @@ else
             if (result != null)
             {
                 Message = "Product updated successfully";
-                product = result; // Update the product with the returned result
+                product = result;// Update the product with the returned result
             }
             else
             {
@@ -260,14 +268,82 @@ else
         await InvokeAsync(() => StateHasChanged());
     }
 
+    /*[Authorize(Roles = "Admin, Staff")]
+    public async void AddProduct()
+    {
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
+        if (!authorizationResult.Succeeded)
+        {
+            Message = "You are not authorized to add products.";
+            Logger.LogWarning("User is not authorized to add products.");
+            Logger.LogDebug("User Details: {user}", AuthenticationState.User);
+            return;
+        }
+
+        try
+        {
+            var result = await ProductService.AddProduct(product);
+            if (result != null)
+            {
+                Message = "Product added successfully";
+                product = result;
+            }
+            else
+            {
+                Message = "Product add failed";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"Product add failed: {ex.Message}");
+            Message = $"Product add failed: {ex.Message}";
+        }
+    }*/
+
     protected override async Task OnInitializedAsync()
     {
         AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-        // Only retrieve the product if it has not been deleted
-        if (!IsProductDeleted)
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Pre-authorize the user before updating the product
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
+        if (!authorizationResult.Succeeded)
         {
-            product = await ProductService.GetProduct(int.Parse(Id));
+            AddMode = false;
+            EditMode = false;
+        }
+
+
+        if (AddMode == true)
+        {
+            product = new ProductDto();
+            productCategories = await ProductCategoryService.GetProductCategories();
+            product.CategoryId = productCategories.First().Id;
+
+            EditMode = true;
+        }
+        else
+        {
+            try
+            {
+                product = await ProductService.GetProduct(int.Parse(Id));
+                productCategories = await ProductCategoryService.GetProductCategories();
+                
+                // If in EditMode and product.CategoryId is not valid, select the first category
+                if (EditMode == true && product.CategoryId == 0 && productCategories.Any())
+                {
+                    product.CategoryId = productCategories.First().Id;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Unable to fetch product details");
+                // Redirect to the /products page
+                NavigationManager.NavigateTo("/products");
+            }
         }
     }
 }

@@ -1,8 +1,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using Shop.Shared.Entities;
 
-namespace Shop.WebApp.Data
+namespace Shop.WebApp.Services
 {
     public class ApplicationUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser>
     {
@@ -13,15 +14,12 @@ namespace Shop.WebApp.Data
         {
         }
 
-        protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
+        protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser applicationUser)
         {
-            var identity = await base.GenerateClaimsAsync(user);
-            var roles = await UserManager.GetRolesAsync(user);
+            var identity = await base.GenerateClaimsAsync(applicationUser);
+            var roles = await UserManager.GetRolesAsync(applicationUser);
 
-            foreach (var role in roles)
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Role, role));
-            }
+            foreach (var role in roles) identity.AddClaim(new Claim(ClaimTypes.Role, role));
 
             return identity;
         }

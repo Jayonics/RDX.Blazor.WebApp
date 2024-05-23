@@ -1,4 +1,4 @@
-﻿using Shop.API.Entities;
+﻿using Shop.Shared.Entities;
 
 namespace Shop.API.Repositories.Contracts
 {
@@ -10,5 +10,6 @@ namespace Shop.API.Repositories.Contracts
         Task<ProductCategory> GetCategory(int id);
         Task<Product> UpdateProduct(Product product);
         Task<bool> DeleteProduct(int id);
+        Task<Product> AddProduct(Product product);
     }
 }
