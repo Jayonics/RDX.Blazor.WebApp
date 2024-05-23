@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Shop.API.Extensions;
 using Shop.API.Repositories.Contracts;
 using Shop.Models.Dtos;
+using Shop.Models.Requests;
 
 namespace Shop.API.Controllers
 {
