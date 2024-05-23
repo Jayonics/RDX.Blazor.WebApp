@@ -5,6 +5,7 @@ using Shop.API.Extensions;
 using Shop.API.Repositories.Contracts;
 using Shop.Models.Dtos;
 using Shop.Models.Requests;
+using System.Text.Json;
 
 namespace Shop.API.Controllers
 {
@@ -15,6 +16,7 @@ namespace Shop.API.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
+        readonly ILogger _logger;
         readonly IProductRepository productRepository;
         // Create the private instance field for the blob service client
         private readonly BlobServiceClient _blobServiceClient;
@@ -23,9 +25,11 @@ namespace Shop.API.Controllers
         ///     Initializes a new instance of the <see cref="ProductController" /> class.
         /// </summary>
         /// <param name="productRepository">The product repository.</param>
-        public ProductController(IProductRepository productRepository, BlobServiceClient blobServiceClient)
+        /// <param name="blobServiceClient"></param>
+        public ProductController(IProductRepository productRepository, BlobServiceClient blobServiceClient, ILogger<ProductController> logger)
         {
             this.productRepository = productRepository;
+            _logger = logger;
             _blobServiceClient = blobServiceClient;
         }
 
@@ -39,6 +43,17 @@ namespace Shop.API.Controllers
             // Try to execute the following code
             try
             {
+                // Get the container "test" within the blob service
+                var containerClient = _blobServiceClient.GetBlobContainerClient("test").GetBlobsAsync();
+                // Output all items in the blob container
+                await foreach (var item in containerClient)
+                {
+                    // Log each property of the object to the console
+                    _logger.LogDebug(JsonSerializer.Serialize(item, new JsonSerializerOptions { WriteIndented = true }));
+                }
+
+
+
                 // Fetch all products from the repository
                 var products = await productRepository.GetProducts();
                 // Fetch all product categories from the repository
@@ -64,7 +79,7 @@ namespace Shop.API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ProductDto>> GetProduct(int id)
+        public async Task<ActionResult<ProductDto>> GetProduct([FromRoute]int id)
         {
             var product = await productRepository.GetProduct(id);
             if (product == null) return NotFound();
@@ -101,14 +116,14 @@ namespace Shop.API.Controllers
             return Ok(updatedProductDto);
         }
 
-        async Task<bool> ProductExists(int id)
+        async Task<bool> ProductExists([FromRoute]int id)
         {
             var product = await productRepository.GetProduct(id);
             return product != null;
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult> DeleteProduct(int id)
+        public async Task<ActionResult> DeleteProduct([FromRoute]int id)
         {
             var product = await productRepository.GetProduct(id);
             if (product == null) return NotFound();
