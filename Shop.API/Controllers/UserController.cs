@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Shop.API.Extensions;
 using Shop.API.Repositories.Contracts;
 using Shop.Models.Dtos;
@@ -10,13 +11,14 @@ namespace Shop.API.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
-        readonly IUserRepository userRepository;
+        readonly IUserRepository _userRepository;
 
         public UserController(IUserRepository userRepository)
         {
-            this.userRepository = userRepository;
+            this._userRepository = userRepository;
         }
 
         /// <summary>
@@ -29,7 +31,7 @@ namespace Shop.API.Controllers
             try
             {
                 // Fetch all users from the repository
-                var users = await userRepository.GetUsers();
+                var users = await _userRepository.GetUsers();
 
                 // If the users are null, return a NotFound status
                 if (users == null)

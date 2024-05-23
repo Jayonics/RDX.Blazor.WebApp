@@ -15,6 +15,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 // Add Swagger generator to the services
 builder.Services.AddSwaggerGen();
+// Add Authorization to the services
+builder.Services.AddAuthorization();
 
 // If the computername is "INF-LAP-MSI1", use the DevDatabaseConnection connection string,
 // if the computername is "JH-WIN-PC1", use the TestDatabaseConnection connection string,
@@ -77,6 +79,9 @@ app.UseAuthorization();
 
 // Map the controllers
 app.MapControllers();
+
+/*// Map Identity Routes
+app.MapIdentityApi<ApplicationUser>();*/
 
 // Run the application
 app.Run();
