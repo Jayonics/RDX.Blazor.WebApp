@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Shop.API.Data;
-using Shop.API.Entities;
+using Shop.Shared.Data;
+using Shop.Shared.Entities;
 using Shop.API.Repositories.Contracts;
 
 namespace Shop.API.Repositories

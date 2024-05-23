@@ -1,4 +1,4 @@
-﻿namespace Shop.API.Entities
+﻿namespace Shop.Shared.Entities
 {
     /// <summary>
     ///     Represents a product category in the shop.

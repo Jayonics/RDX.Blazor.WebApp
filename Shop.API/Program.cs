@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
-using Shop.API.Data;
+using Shop.Shared.Data;
 using Shop.API.Repositories;
 using Shop.API.Repositories.Contracts;
 
@@ -33,6 +33,11 @@ var connectionString = computerName switch
 
 // Add a database context to the services with a connection pool
 builder.Services.AddDbContextPool<ShopDbContext>(options => {
+    // Use SQL Server with the selected connection string
+    options.UseSqlServer(connectionString);
+});
+
+builder.Services.AddDbContextPool<UserDbContext>(options => {
     // Use SQL Server with the selected connection string
     options.UseSqlServer(connectionString);
 });

@@ -1,4 +1,4 @@
-﻿using Shop.API.Entities;
+﻿using Shop.Shared.Entities;
 using Shop.Models.Dtos;
 using Shop.Models.Requests;
 

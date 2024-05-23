@@ -1,4 +1,4 @@
-﻿namespace Shop.API.Entities
+﻿namespace Shop.Shared.Entities
 {
     /// <summary>
     ///     Represents an item in a shopping cart.

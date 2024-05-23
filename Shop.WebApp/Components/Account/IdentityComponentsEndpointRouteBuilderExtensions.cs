@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Shop.Shared.Entities;
 using Shop.WebApp.Components.Account.Pages;
 using Shop.WebApp.Components.Account.Pages.Manage;
-using Shop.WebApp.Data;
 
 namespace Microsoft.AspNetCore.Routing
 {

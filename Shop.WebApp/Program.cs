@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shop.WebApp.Components;
 using Shop.WebApp.Components.Account;
-using Shop.WebApp.Data;
+using Shop.Shared.Data;
+using Shop.Shared.Entities;
 using Shop.WebApp.Services;
 using Shop.WebApp.Services.Contracts;
 
@@ -37,12 +38,12 @@ namespace Shop.WebApp
                 _ => builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")
             };
 
-            builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
+            builder.Services.AddDbContextPool<UserDbContext>(options =>
             options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddEntityFrameworkStores<UserDbContext>()
             .AddSignInManager()
             .AddDefaultTokenProviders();
 

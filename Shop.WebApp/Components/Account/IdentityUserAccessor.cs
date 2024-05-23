@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Identity;
-using Shop.WebApp.Data;
+using Shop.Shared.Entities;
 
 namespace Shop.WebApp.Components.Account
 {

@@ -1,4 +1,4 @@
-using Shop.API.Entities;
+using Shop.Shared.Entities;
 
 namespace Shop.API.Repositories.Contracts
 {
