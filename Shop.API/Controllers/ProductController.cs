@@ -72,7 +72,7 @@ namespace Shop.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<ProductDto>> UpdateProduct(int id, ProductDto productDto)
+        public async Task<ActionResult<ProductDto>> UpdateProduct([FromRoute]int id, [FromBody]ProductDto productDto)
         {
             if (id != productDto.Id) return BadRequest();
 
@@ -123,9 +123,16 @@ namespace Shop.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> AddProduct(ProductDto productDto)
+        public async Task<ActionResult<ProductDto>> AddProduct([FromBody]NewProductDto productDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             // Attempt to convert the DTO to an entity before adding it to the repository
+
+
             // Return a 400 Bad Request status if the conversion fails
             if (productDto.ConvertToEntity() != null)
                 try

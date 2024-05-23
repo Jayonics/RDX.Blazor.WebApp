@@ -92,6 +92,7 @@ namespace Shop.API.Repositories
 
         public async Task<Product> AddProduct(Product product)
         {
+            _logger.LogDebug($"Attempting to add product {product.Name} to the database.");
             try
             {
                 // Log a warning if the product ID is not 0 or null

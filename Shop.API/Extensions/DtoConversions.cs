@@ -1,5 +1,6 @@
 ﻿using Shop.API.Entities;
 using Shop.Models.Dtos;
+using Shop.Models.Requests;
 
 namespace Shop.API.Extensions
 {
@@ -59,18 +60,22 @@ namespace Shop.API.Extensions
             CategoryId = productDto.CategoryId
         };
 
-        /// <summary>
-        ///     Converts a collection of User entities to UserDto objects.
-        /// </summary>
-        /// <param name="users">The collection of User entities to convert.</param>
-        /// <returns>A collection of UserDto objects.</returns>
-        public static IEnumerable<UserDto> ConvertToDto(this IEnumerable<User> users) => (from user in users
-                                                                                          select new UserDto
-                                                                                          {
-                                                                                              Id = user.Id,
-                                                                                              UserName = user.UserName,
-                                                                                              Admin = user.Admin
-                                                                                          }).ToList();
+        public static Product ConvertToEntity(this NewProductDto productDto) => new()
+        {
+            Name = productDto.Name,
+            Description = productDto.Description,
+            ImageURL = productDto.ImageURL,
+            Price = productDto.Price,
+            Quantity = productDto.Quantity,
+            CategoryId = productDto.CategoryId
+        };
+
+                                                                                                    select new UserDto
+                                                                                                    {
+                                                                                                        Id = user.Id,
+                                                                                                        UserName = user.UserName,
+                                                                                                        Email = user.Email
+                                                                                                    }).ToList();
 
         // ProductCategory conversions
         public static IEnumerable<ProductCategoryDto> ConvertToDto(this IEnumerable<ProductCategory> productCategories) => (from productCategory in productCategories

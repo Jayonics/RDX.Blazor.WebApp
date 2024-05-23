@@ -1,4 +1,5 @@
 ﻿using Shop.Models.Dtos;
+using Shop.Models.Requests;
 
 namespace Shop.WebApp.Services.Contracts
 {
@@ -8,6 +9,6 @@ namespace Shop.WebApp.Services.Contracts
         Task<ProductDto> GetProduct(int id);
         Task<ProductDto> UpdateProduct(ProductDto product);
         Task<bool> DeleteProduct(int id);
-        Task<ProductDto> AddProduct(ProductDto product);
+        Task<ProductDto> AddProduct(NewProductDto product);
     }
 }

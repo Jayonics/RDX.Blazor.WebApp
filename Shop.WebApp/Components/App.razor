@@ -40,7 +40,7 @@
     private IComponentRenderMode? RenderModeForPage =>
     HttpContext.Request.Path.StartsWithSegments("/Account")
     ? null
-    : InteractiveServer;
+    : RenderMode.InteractiveServer;
 
     [CascadingParameter]
     private AuthenticationState? AuthenticationState { get; set; }

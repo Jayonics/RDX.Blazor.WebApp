@@ -3,6 +3,7 @@
 @using Shop.WebApp.Services.Contracts
 @rendermode InteractiveServer
 @inject IProductService ProductService
+@inject IProductCategoryService ProductCategoryService
 @inject ILogger<Product> Logger
 @inject NavigationManager NavigationManager
 @inject IAuthorizationService AuthorizationService
@@ -95,7 +96,12 @@ else
                                         <div class="col">
                                             @if (EditMode == true)
                                             {
-                                                <InputText type="number" class="form-control" @bind-value="product.CategoryName"/>
+                                                <InputSelect class="form-control" @bind-Value="product.CategoryId">
+                                                    @foreach (var category in productCategories)
+                                                    {
+                                                        <option value="@category.Id">@category.Name</option>
+                                                    }
+                                                </InputSelect>
                                             }
                                             else
                                             {
@@ -104,11 +110,7 @@ else
                                         </div>
                                     </div>
                                 </div>
-                                @if (AddMode == true)
-                                {
-                                    <button class="btn btn-success mt-3" @onclick="AddProduct">Add Product</button>
-                                }
-                                else if (EditMode == true)
+                                @if (EditMode == true)
                                 {
                                     <button class="btn btn-success mt-3" @onclick="UpdateProduct">Save Changes</button>
                                 }
@@ -148,6 +150,9 @@ else
 
     [SupplyParameterFromForm]
     public ProductDto product { get; set; }
+
+    [Parameter]
+    public IEnumerable<ProductCategoryDto> productCategories { get; set; }
 
     [SupplyParameterFromQuery]
     private bool? EditMode { get; set; } = false;
@@ -263,7 +268,7 @@ else
         await InvokeAsync(() => StateHasChanged());
     }
 
-    [Authorize(Roles = "Admin, Staff")]
+    /*[Authorize(Roles = "Admin, Staff")]
     public async void AddProduct()
     {
         var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
@@ -293,7 +298,7 @@ else
             Logger.LogError(ex, $"Product add failed: {ex.Message}");
             Message = $"Product add failed: {ex.Message}";
         }
-    }
+    }*/
 
     protected override async Task OnInitializedAsync()
     {
@@ -315,6 +320,9 @@ else
         if (AddMode == true)
         {
             product = new ProductDto();
+            productCategories = await ProductCategoryService.GetProductCategories();
+            product.CategoryId = productCategories.First().Id;
+
             EditMode = true;
         }
         else
@@ -322,6 +330,13 @@ else
             try
             {
                 product = await ProductService.GetProduct(int.Parse(Id));
+                productCategories = await ProductCategoryService.GetProductCategories();
+                
+                // If in EditMode and product.CategoryId is not valid, select the first category
+                if (EditMode == true && product.CategoryId == 0 && productCategories.Any())
+                {
+                    product.CategoryId = productCategories.First().Id;
+                }
             }
             catch (Exception ex)
             {
