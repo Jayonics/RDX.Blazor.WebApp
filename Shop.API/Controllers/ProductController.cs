@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.API.Extensions;
 using Shop.API.Repositories.Contracts;
@@ -15,14 +16,17 @@ namespace Shop.API.Controllers
     public class ProductController : ControllerBase
     {
         readonly IProductRepository productRepository;
+        // Create the private instance field for the blob service client
+        private readonly BlobServiceClient _blobServiceClient;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProductController" /> class.
         /// </summary>
         /// <param name="productRepository">The product repository.</param>
-        public ProductController(IProductRepository productRepository)
+        public ProductController(IProductRepository productRepository, BlobServiceClient blobServiceClient)
         {
             this.productRepository = productRepository;
+            _blobServiceClient = blobServiceClient;
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using Microsoft.Net.Http.Headers;
 using Shop.Shared.Data;
 using Shop.API.Repositories;
 using Shop.API.Repositories.Contracts;
+using Microsoft.Extensions.Azure;
 
 // Entry point of the application
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +52,23 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 // Add the product category repository to the services
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 
+/* For the Azurite Storage Emulator */
+// With connection string
+//builder.Services.AddAzureClients(clientBuilder => {
+//    clientBuilder.AddBlobServiceClient(builder.Configuration["StorageConnectionString:blob"]!, preferMsi: true);
+//    clientBuilder.AddQueueServiceClient(builder.Configuration["StorageConnectionString:queue"]!, preferMsi: true);
+//});
+builder.Services.AddAzureClients(clientBuilder => {
+    clientBuilder.AddBlobServiceClient(
+        builder.Configuration["StorageConnectionString:blob"]!
+        );
+});
+
+
+// Activate Identity APIs
+/*builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+.AddEntityFrameworkStores<UserDbContext>();*/
+
 // Build the application
 var app = builder.Build();
 
@@ -70,6 +88,9 @@ policy.WithOrigins("https://localhost:7138", "http://localhost:7138")
 .AllowAnyMethod()
 .WithHeaders(HeaderNames.ContentType)
 );
+
+
+
 
 // Use HTTPS redirection
 app.UseHttpsRedirection();
