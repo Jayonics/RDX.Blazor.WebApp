@@ -17,19 +17,19 @@ namespace Shop.API.Controllers
         }
 
         [HttpGet()]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<BlobDto>>> Get()
         {
             // Get all files at the Azure Storage Location and return them
-            List<BlobDto>? files = await _storage.ListAsync();
+            IEnumerable<BlobDto> files = await _storage.ListAsync();
 
             // Returns an empty array if no files are present at the storage container
-            return StatusCode(StatusCodes.Status200OK, files);
+            return Ok(files);
         }
 
         [HttpPost()]
         // Set the maximum size of the request to 50MB
         [RequestSizeLimit(bytes: 52428800)]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<ActionResult<BlobResponseDto>> Upload(IFormFile file)
         {
             BlobResponseDto? response = await _storage.UploadAsync(file);
 
@@ -47,7 +47,7 @@ namespace Shop.API.Controllers
         }
 
         [HttpGet("{filename}")]
-        public async Task<IActionResult> Download([FromRoute]string filename)
+        public async Task<ActionResult<BlobDto>> Download([FromRoute]string filename)
         {
             BlobDto? file = await _storage.DownloadAsync(filename);
 
@@ -65,7 +65,7 @@ namespace Shop.API.Controllers
         }
 
         [HttpDelete("{filename}")]
-        public async Task<IActionResult> Delete([FromRoute]string filename)
+        public async Task<ActionResult<BlobResponseDto>> Delete([FromRoute]string filename)
         {
             BlobResponseDto response = await _storage.DeleteAsync(filename);
 
