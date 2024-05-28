@@ -19,18 +19,17 @@ builder.Services.AddSwaggerGen();
 // Add Authorization to the services
 builder.Services.AddAuthorization();
 
-// If the computername is "INF-LAP-MSI1", use the DevDatabaseConnection connection string,
-// if the computername is "JH-WIN-PC1", use the TestDatabaseConnection connection string,
-
 // Get the machine name
 var computerName = Environment.MachineName;
+
+builder.Configuration
+    .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddJsonFile($"appsettings.{computerName}.json", optional: true)
+    .AddEnvironmentVariables();
+
 // Select the connection string based on the machine name
-var connectionString = computerName switch
-{
-    "INF-LAP-MSI1" => builder.Configuration.GetConnectionString("DevDatabaseConnection"),
-    "JH-WIN-PC1" => builder.Configuration.GetConnectionString("TestDatabaseConnection"),
-    _ => builder.Configuration.GetConnectionString("DefaultConnection")
-};
+var connectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
 
 // This is the Dependency Injection (DI) container
 

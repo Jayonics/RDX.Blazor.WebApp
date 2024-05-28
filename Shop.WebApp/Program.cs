@@ -30,13 +30,15 @@ namespace Shop.WebApp
 
             // Get the machine name
             var computerName = Environment.MachineName;
-// Select the connection string based on the machine name
-            var connectionString = computerName switch
-            {
-                "INF-LAP-MSI1" => builder.Configuration.GetConnectionString("DevDatabaseConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."),
-                "JH-WIN-PC1" => builder.Configuration.GetConnectionString("TestDatabaseConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."),
-                _ => builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")
-            };
+
+            builder.Configuration
+            .AddJsonFile("appsettings.json")
+            .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+            .AddJsonFile($"appsettings.{computerName}.json", optional: true)
+            .AddEnvironmentVariables();
+
+            // Select the connection string based on the machine name
+            var connectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
 
             builder.Services.AddDbContextPool<UserDbContext>(options =>
             options.UseSqlServer(connectionString));
