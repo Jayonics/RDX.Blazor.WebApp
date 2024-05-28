@@ -18,6 +18,27 @@ namespace Shop.Shared.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            //Add Product Categories
+            modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
+            {
+                Id = 1,
+                Name = "Beauty"
+            });
+            modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
+            {
+                Id = 2,
+                Name = "Furniture"
+            });
+            modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
+            {
+                Id = 3,
+                Name = "Electronics"
+            });
+            modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
+            {
+                Id = 4,
+                Name = "Shoes"
+            });
 
             //Products
             //Beauty Category
@@ -300,27 +321,6 @@ namespace Shop.Shared.Data
                 UserId = 2
 
             });*/
-            //Add Product Categories
-            modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
-            {
-                Id = 1,
-                Name = "Beauty"
-            });
-            modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
-            {
-                Id = 2,
-                Name = "Furniture"
-            });
-            modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
-            {
-                Id = 3,
-                Name = "Electronics"
-            });
-            modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
-            {
-                Id = 4,
-                Name = "Shoes"
-            });
         }
     }
 }
