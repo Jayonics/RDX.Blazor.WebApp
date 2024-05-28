@@ -17,10 +17,10 @@ namespace Shop.API.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<BlobDto>>> Get()
+        public async Task<ActionResult<IList<BlobDto>>> Get()
         {
             // Get all files at the Azure Storage Location and return them
-            IEnumerable<BlobDto> files = await _storage.ListAsync();
+            List<BlobDto> files = await _storage.ListAsync();
 
             // Returns an empty array if no files are present at the storage container
             return Ok(files);
