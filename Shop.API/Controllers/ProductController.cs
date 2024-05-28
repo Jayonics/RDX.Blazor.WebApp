@@ -50,7 +50,8 @@ namespace Shop.API.Controllers
                     return NotFound();
                 }
                 // Convert the products to DTOs using the fetched categories
-                var productDtos = products.ConvertToDto(productCategories);
+                var productDtos = products.ConvertToDto(productCategories, _configuration["Storage:BlobContainerURL"]);
+
                 // Return the converted DTOs with an Ok status
                 return Ok(productDtos);
             }
@@ -72,7 +73,7 @@ namespace Shop.API.Controllers
             var productCategory = await _productRepository.GetCategory(product.CategoryId);
             if (productCategory == null) return NotFound();
 
-            var productDto = product.ConvertToDto(productCategory);
+            var productDto = product.ConvertToDto(productCategory, _configuration["Storage:BlobContainerURL"]);
             return Ok(productDto);
         }
 
@@ -97,7 +98,7 @@ namespace Shop.API.Controllers
             var productCategory = await _productRepository.GetCategory(product.CategoryId);
             if (productCategory == null) return NotFound();
 
-            var updatedProductDto = product.ConvertToDto(productCategory);
+            var updatedProductDto = product.ConvertToDto(productCategory, _configuration["Storage:BlobContainerURL"]);
             return Ok(updatedProductDto);
         }
 
@@ -142,9 +143,9 @@ namespace Shop.API.Controllers
             if (productDto.ConvertToEntity() != null)
                 try
                 {
-                    return Ok(product.ConvertToDto(productCategory));
                     var product = await _productRepository.AddProduct(productDto.ConvertToEntity());
                     var productCategory = await _productRepository.GetCategory(product.CategoryId);
+                    return Ok(product.ConvertToDto(productCategory, _configuration["Storage:BlobContainerURL"]));
 
                 }
                 catch (Exception exception)

@@ -1,6 +1,7 @@
 ﻿using Shop.Shared.Entities;
 using Shop.Models.Dtos;
 using Shop.Models.Requests;
+using Shop.Shared.Extensions;
 
 namespace Shop.API.Extensions
 {
@@ -16,7 +17,7 @@ namespace Shop.API.Extensions
         /// <param name="productCategories">The collection of ProductCategory entities to use for category information.</param>
         /// <returns>A collection of ProductDto objects.</returns>
         public static IEnumerable<ProductDto> ConvertToDto(this IEnumerable<Product> products,
-            IEnumerable<ProductCategory> productCategories) => (from product in products
+            IEnumerable<ProductCategory> productCategories, string baseImageUrl = null) => (from product in products
                                                                 join productCategory in productCategories
                                                                 on product.CategoryId equals productCategory.Id
                                                                 select new ProductDto
@@ -37,7 +38,7 @@ namespace Shop.API.Extensions
         /// <param name="product">The Product entity to convert.</param>
         /// <param name="productCategory">The ProductCategory entity to use for category information.</param>
         /// <returns>A ProductDto object.</returns>
-        public static ProductDto ConvertToDto(this Product product, ProductCategory productCategory) => new()
+        public static ProductDto ConvertToDto(this Product product, ProductCategory productCategory, string baseImageUrl = null) => new()
         {
             Id = product.Id,
             Name = product.Name,
