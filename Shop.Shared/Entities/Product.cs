@@ -1,4 +1,8 @@
-﻿namespace Shop.Shared.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+
+namespace Shop.Shared.Entities
 {
     /// <summary>
     ///     Represents a product in the shop.
@@ -8,6 +12,7 @@
         /// <summary>
         ///     Gets or sets the unique identifier for the product.
         /// </summary>
+        [Key]
         public int Id { get; set; }
 
         /// <summary>
@@ -26,6 +31,11 @@
         public string ImageURL { get; set; }
 
         /// <summary>
+        ///  Gets or sets the collection of images for the product.
+        /// </summary>
+        public ICollection<ProductImage>? ProductImages { get; set; }
+
+        /// <summary>
         ///     Gets or sets the price of the product.
         /// </summary>
         public decimal Price { get; set; }
@@ -35,9 +45,12 @@
         /// </summary>
         public int Quantity { get; set; }
 
+
+        public int CategoryId { get; set; }
         /// <summary>
         ///     Gets or sets the identifier of the category that the product belongs to.
         /// </summary>
-        public int CategoryId { get; set; }
+        [ForeignKey("CategoryId")]
+        public ProductCategory Category { get; set; }
     }
 }
