@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Shop.Shared.Entities
 {
@@ -25,10 +27,10 @@ namespace Shop.Shared.Entities
         /// </summary>
         public string Description { get; set; }
 
-        /// <summary>
+        /*/// <summary>
         ///     Gets or sets the URL of the product's image.
         /// </summary>
-        public string ImageURL { get; set; }
+        public string ImageURL { get; set; }*/
 
         /// <summary>
         ///  Gets or sets the collection of images for the product.
@@ -38,19 +40,25 @@ namespace Shop.Shared.Entities
         /// <summary>
         ///     Gets or sets the price of the product.
         /// </summary>
+
+        [Column(TypeName = "money")] // This is a SQL Server specific data type that maps to the .NET decimal type.
         public decimal Price { get; set; }
 
         /// <summary>
         ///     Gets or sets the quantity of the product in stock.
         /// </summary>
+        [Range(0, int.MaxValue)]
         public int Quantity { get; set; }
 
-
-        public int CategoryId { get; set; }
         /// <summary>
         ///     Gets or sets the identifier of the category that the product belongs to.
         /// </summary>
         [ForeignKey("CategoryId")]
+        public Guid CategoryId { get; set; }
+
+        /// <summary>
+        /// Navigation property for the relationship with the category.
+        /// </summary>
         public ProductCategory Category { get; set; }
     }
 }

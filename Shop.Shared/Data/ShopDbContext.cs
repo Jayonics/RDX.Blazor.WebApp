@@ -18,26 +18,55 @@ namespace Shop.Shared.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            // Generate new Guid values
+            //
+            Guid beautyId = Guid.NewGuid();
+            Guid furnitureId = Guid.NewGuid();
+            Guid electronicsId = Guid.NewGuid();
+            Guid shoesId = Guid.NewGuid();
+
+            Guid image1Id = Guid.NewGuid();
+            Guid image2Id = Guid.NewGuid();
+
+            modelBuilder.Entity<ProductCategory>()
+            .Property(p => p.Id)
+            .HasDefaultValueSql("newid()");
+
             //Add Product Categories
             modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
             {
-                Id = 1,
+                Id = beautyId,
                 Name = "Beauty"
             });
             modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
             {
-                Id = 2,
+                Id = furnitureId,
                 Name = "Furniture"
             });
             modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
             {
-                Id = 3,
+                Id = electronicsId,
                 Name = "Electronics"
             });
             modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
             {
-                Id = 4,
+                Id = shoesId,
                 Name = "Shoes"
+            });
+
+            modelBuilder.Entity<ProductImage>().HasData(new ProductImage
+            {
+                Id = image1Id,
+                Name = "Image1.png",
+                ProductId = 1, // assuming this product exists
+                StorageContainers = new[] { StorageContainers.shop }
+            });
+            modelBuilder.Entity<ProductImage>().HasData(new ProductImage
+            {
+                Id = image2Id,
+                Name = "Image2.png",
+                ProductId = 2, // assuming this product exists
+                StorageContainers = new[] { StorageContainers.shop }
             });
 
             //Products
@@ -47,10 +76,24 @@ namespace Shop.Shared.Data
                 Id = 1,
                 Name = "Glossier - Beauty Kit",
                 Description = "A kit provided by Glossier, containing skin care, hair care and makeup products",
-                ImageURL = "/Images/Beauty/Beauty1.png",
+                ProductImages = new List<ProductImage>
+                {
+                    new()
+                    {
+                        Id = image1Id,
+                        Name = "Beauty1.png",
+                        StorageContainers = new[] { StorageContainers.shop }
+                    },
+                    new()
+                    {
+                        Id = image2Id,
+                        Name = "Beauty2.png",
+                        StorageContainers = new[] { StorageContainers.shop }
+                    }
+                },
                 Price = 100,
                 Quantity = 100,
-                CategoryId = 1
+                CategoryId = beautyId
 
             });
             modelBuilder.Entity<Product>().HasData(new Product
@@ -61,7 +104,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Beauty/Beauty2.png",
                 Price = 50,
                 Quantity = 45,
-                CategoryId = 1
+                CategoryId = beautyId
 
             });
             modelBuilder.Entity<Product>().HasData(new Product
@@ -72,7 +115,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Beauty/Beauty3.png",
                 Price = 20,
                 Quantity = 30,
-                CategoryId = 1
+                CategoryId = beautyId
 
             });
             modelBuilder.Entity<Product>().HasData(new Product
@@ -83,7 +126,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Beauty/Beauty4.png",
                 Price = 50,
                 Quantity = 60,
-                CategoryId = 1
+                CategoryId = beautyId
 
             });
             modelBuilder.Entity<Product>().HasData(new Product
@@ -94,7 +137,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Beauty/Beauty5.png",
                 Price = 30,
                 Quantity = 85,
-                CategoryId = 1
+                CategoryId = beautyId
 
             });
             //Electronics Category
@@ -106,7 +149,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Electronic/Electronics1.png",
                 Price = 100,
                 Quantity = 120,
-                CategoryId = 3
+                CategoryId = electronicsId
 
             });
             modelBuilder.Entity<Product>().HasData(new Product
@@ -117,7 +160,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Electronic/Electronics2.png",
                 Price = 40,
                 Quantity = 200,
-                CategoryId = 3
+                CategoryId = electronicsId
 
             });
             modelBuilder.Entity<Product>().HasData(new Product
@@ -128,7 +171,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Electronic/Electronics3.png",
                 Price = 40,
                 Quantity = 300,
-                CategoryId = 3
+                CategoryId = electronicsId
 
             });
             modelBuilder.Entity<Product>().HasData(new Product
@@ -139,7 +182,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Electronic/Electronic4.png",
                 Price = 600,
                 Quantity = 20,
-                CategoryId = 3
+                CategoryId = electronicsId
 
             });
             modelBuilder.Entity<Product>().HasData(new Product
@@ -150,7 +193,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Electronic/Electronic5.png",
                 Price = 500,
                 Quantity = 15,
-                CategoryId = 3
+                CategoryId = electronicsId
 
             });
             modelBuilder.Entity<Product>().HasData(new Product
@@ -161,7 +204,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Electronic/technology6.png",
                 Price = 100,
                 Quantity = 60,
-                CategoryId = 3
+                CategoryId = electronicsId
             });
             //Furniture Category
             modelBuilder.Entity<Product>().HasData(new Product
@@ -172,7 +215,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Furniture/Furniture1.png",
                 Price = 50,
                 Quantity = 212,
-                CategoryId = 2
+                CategoryId = furnitureId
             });
 
             modelBuilder.Entity<Product>().HasData(new Product
@@ -183,7 +226,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Furniture/Furniture2.png",
                 Price = 50,
                 Quantity = 112,
-                CategoryId = 2
+                CategoryId = furnitureId
             });
             modelBuilder.Entity<Product>().HasData(new Product
             {
@@ -193,7 +236,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Furniture/Furniture3.png",
                 Price = 70,
                 Quantity = 90,
-                CategoryId = 2
+                CategoryId = furnitureId
             });
             modelBuilder.Entity<Product>().HasData(new Product
             {
@@ -203,7 +246,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Furniture/Furniture4.png",
                 Price = 120,
                 Quantity = 95,
-                CategoryId = 2
+                CategoryId = furnitureId
             });
             modelBuilder.Entity<Product>().HasData(new Product
             {
@@ -213,7 +256,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Furniture/Furniture6.png",
                 Price = 15,
                 Quantity = 100,
-                CategoryId = 2
+                CategoryId = furnitureId
             });
             modelBuilder.Entity<Product>().HasData(new Product
             {
@@ -223,7 +266,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Furniture/Furniture7.png",
                 Price = 20,
                 Quantity = 73,
-                CategoryId = 2
+                CategoryId = furnitureId
             });
             //Shoes Category
             modelBuilder.Entity<Product>().HasData(new Product
@@ -234,7 +277,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Shoes/Shoes1.png",
                 Price = 100,
                 Quantity = 50,
-                CategoryId = 4
+                CategoryId = shoesId
             });
             modelBuilder.Entity<Product>().HasData(new Product
             {
@@ -244,7 +287,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Shoes/Shoes2.png",
                 Price = 150,
                 Quantity = 60,
-                CategoryId = 4
+                CategoryId = shoesId
             });
             modelBuilder.Entity<Product>().HasData(new Product
             {
@@ -254,7 +297,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Shoes/Shoes3.png",
                 Price = 200,
                 Quantity = 70,
-                CategoryId = 4
+                CategoryId = shoesId
             });
             modelBuilder.Entity<Product>().HasData(new Product
             {
@@ -264,7 +307,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Shoes/Shoes4.png",
                 Price = 120,
                 Quantity = 120,
-                CategoryId = 4
+                CategoryId = shoesId
             });
             modelBuilder.Entity<Product>().HasData(new Product
             {
@@ -274,7 +317,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Shoes/Shoes5.png",
                 Price = 200,
                 Quantity = 100,
-                CategoryId = 4
+                CategoryId = shoesId
             });
             modelBuilder.Entity<Product>().HasData(new Product
             {
@@ -284,7 +327,7 @@ namespace Shop.Shared.Data
                 ImageURL = "/Images/Shoes/Shoes6.png",
                 Price = 50,
                 Quantity = 150,
-                CategoryId = 4
+                CategoryId = shoesId
             });
 
             /*//Add users

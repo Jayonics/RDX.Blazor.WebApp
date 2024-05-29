@@ -41,11 +41,11 @@ namespace Shop.Shared.Entities
         /// Gets or sets the hash of the file (MD5).
         /// This can be used for repairing the Name identifier to a file by searching for the hash in the storage container.
         /// </summary>
-        public string? ContentMD5 { get; set; }
+        public byte[]? ContentMD5 { get; set; }
 
         /// <summary>
-        /// Gets or sets a reference to the storage container if the file is stored in Azure Blob Storage.
+        /// Gets or sets a reference to the storage container (potentially multiple) if the file is stored in Azure Blob Storage.
         /// </summary>
-        public StorageContainers ContainerName { get; set; }
+        public IList<StorageContainers> StorageContainers { get; set; }
     }
 }
