@@ -8,8 +8,8 @@ namespace Shop.Models.Requests
         public string Name { get; set; }
         [Required(ErrorMessage = "Description is required")]
         public string Description { get; set; }
-        // [Url(ErrorMessage = "Invalid URL")]
-        // [Required(ErrorMessage = "Image URL is required")]
+        [Url(ErrorMessage = "Invalid URL")]
+        [Required(ErrorMessage = "Image URL is required")]
         public string ImageURL { get; set; }
         [Required(ErrorMessage = "Price is required")]
         [DataType(DataType.Currency)]

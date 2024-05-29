@@ -14,31 +14,35 @@ namespace Shop.API.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        readonly IProductRepository productRepository;
+        readonly ILogger _logger;
+        readonly IProductRepository _productRepository;
+        private readonly IConfiguration _configuration;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProductController" /> class.
         /// </summary>
         /// <param name="productRepository">The product repository.</param>
-        public ProductController(IProductRepository productRepository)
+        public ProductController(IProductRepository productRepository, ILogger<ProductController> logger, IConfiguration configuration)
         {
-            this.productRepository = productRepository;
+            _productRepository = productRepository;
+            _logger = logger;
+            _configuration = configuration;
         }
 
         /// <summary>
         ///     Gets all items from the product repository.
         /// </summary>
         /// <returns>A list of product DTOs.</returns>
-        [HttpGet]
+        [HttpGet()]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
         {
             // Try to execute the following code
             try
             {
                 // Fetch all products from the repository
-                var products = await productRepository.GetProducts();
+                var products = await _productRepository.GetProducts();
                 // Fetch all product categories from the repository
-                var productCategories = await productRepository.GetCategories();
+                var productCategories = await _productRepository.GetCategories();
 
                 // If either products or product categories are null, return a NotFound status
                 if (products == null || productCategories == null)
@@ -47,6 +51,7 @@ namespace Shop.API.Controllers
                 }
                 // Convert the products to DTOs using the fetched categories
                 var productDtos = products.ConvertToDto(productCategories);
+
                 // Return the converted DTOs with an Ok status
                 return Ok(productDtos);
             }
@@ -60,12 +65,12 @@ namespace Shop.API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ProductDto>> GetProduct(int id)
+        public async Task<ActionResult<ProductDto>> GetProduct([FromRoute]int id)
         {
-            var product = await productRepository.GetProduct(id);
+            var product = await _productRepository.GetProduct(id);
             if (product == null) return NotFound();
 
-            var productCategory = await productRepository.GetCategory(product.CategoryId);
+            var productCategory = await _productRepository.GetCategory(product.CategoryId);
             if (productCategory == null) return NotFound();
 
             var productDto = product.ConvertToDto(productCategory);
@@ -81,7 +86,7 @@ namespace Shop.API.Controllers
 
             try
             {
-                product = await productRepository.UpdateProduct(product);
+                product = await _productRepository.UpdateProduct(product);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -90,28 +95,28 @@ namespace Shop.API.Controllers
                 throw;
             }
 
-            var productCategory = await productRepository.GetCategory(product.CategoryId);
+            var productCategory = await _productRepository.GetCategory(product.CategoryId);
             if (productCategory == null) return NotFound();
 
             var updatedProductDto = product.ConvertToDto(productCategory);
             return Ok(updatedProductDto);
         }
 
-        async Task<bool> ProductExists(int id)
+        async Task<bool> ProductExists([FromRoute]int id)
         {
-            var product = await productRepository.GetProduct(id);
+            var product = await _productRepository.GetProduct(id);
             return product != null;
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult> DeleteProduct(int id)
+        public async Task<ActionResult> DeleteProduct([FromRoute]int id)
         {
-            var product = await productRepository.GetProduct(id);
+            var product = await _productRepository.GetProduct(id);
             if (product == null) return NotFound();
 
             try
             {
-                await productRepository.DeleteProduct(id);
+                await _productRepository.DeleteProduct(id);
                 return Ok();
             }
             catch (Exception)
@@ -138,8 +143,8 @@ namespace Shop.API.Controllers
             if (productDto.ConvertToEntity() != null)
                 try
                 {
-                    var product = await productRepository.AddProduct(productDto.ConvertToEntity());
-                    var productCategory = await productRepository.GetCategory(product.CategoryId);
+                    var product = await _productRepository.AddProduct(productDto.ConvertToEntity());
+                    var productCategory = await _productRepository.GetCategory(product.CategoryId);
                     return Ok(product.ConvertToDto(productCategory));
 
                 }

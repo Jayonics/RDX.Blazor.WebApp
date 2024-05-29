@@ -3,6 +3,7 @@ using Microsoft.Net.Http.Headers;
 using Shop.Shared.Data;
 using Shop.API.Repositories;
 using Shop.API.Repositories.Contracts;
+using Microsoft.Extensions.Azure;
 
 // Entry point of the application
 var builder = WebApplication.CreateBuilder(args);
@@ -18,18 +19,17 @@ builder.Services.AddSwaggerGen();
 // Add Authorization to the services
 builder.Services.AddAuthorization();
 
-// If the computername is "INF-LAP-MSI1", use the DevDatabaseConnection connection string,
-// if the computername is "JH-WIN-PC1", use the TestDatabaseConnection connection string,
-
 // Get the machine name
 var computerName = Environment.MachineName;
+
+builder.Configuration
+    .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddJsonFile($"appsettings.{computerName}.json", optional: true)
+    .AddEnvironmentVariables();
+
 // Select the connection string based on the machine name
-var connectionString = computerName switch
-{
-    "INF-LAP-MSI1" => builder.Configuration.GetConnectionString("DevDatabaseConnection"),
-    "JH-WIN-PC1" => builder.Configuration.GetConnectionString("TestDatabaseConnection"),
-    _ => builder.Configuration.GetConnectionString("DefaultConnection")
-};
+var connectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
 
 // This is the Dependency Injection (DI) container
 
@@ -51,6 +51,20 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 // Add the product category repository to the services
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 
+/* For the Azurite Storage Emulator */
+// With connection string
+builder.Services.AddAzureClients(clientBuilder => {
+    clientBuilder.AddBlobServiceClient(builder.Configuration["StorageConnectionString:blob"]!, preferMsi: true);
+    clientBuilder.AddQueueServiceClient(builder.Configuration["StorageConnectionString:queue"]!, preferMsi: true);
+});
+
+builder.Services.AddScoped<IAzureStorageRepository, AzureStorageRepository>();
+
+
+// Activate Identity APIs
+/*builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+.AddEntityFrameworkStores<UserDbContext>();*/
+
 // Build the application
 var app = builder.Build();
 
@@ -70,6 +84,9 @@ policy.WithOrigins("https://localhost:7138", "http://localhost:7138")
 .AllowAnyMethod()
 .WithHeaders(HeaderNames.ContentType)
 );
+
+
+
 
 // Use HTTPS redirection
 app.UseHttpsRedirection();

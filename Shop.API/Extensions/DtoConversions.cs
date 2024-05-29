@@ -1,6 +1,7 @@
 ﻿using Shop.Shared.Entities;
 using Shop.Models.Dtos;
 using Shop.Models.Requests;
+using Shop.Shared.Extensions;
 
 namespace Shop.API.Extensions
 {
@@ -69,15 +70,6 @@ namespace Shop.API.Extensions
             Quantity = productDto.Quantity,
             CategoryId = productDto.CategoryId
         };
-
-        // ApplicationUser conversions
-        public static IEnumerable<UserDto> ConvertToDto(this IEnumerable<ApplicationUser> users) => (from user in users
-                                                                                                    select new UserDto
-                                                                                                    {
-                                                                                                        Id = user.Id,
-                                                                                                        UserName = user.UserName,
-                                                                                                        Email = user.Email
-                                                                                                    }).ToList();
 
         // ProductCategory conversions
         public static IEnumerable<ProductCategoryDto> ConvertToDto(this IEnumerable<ProductCategory> productCategories) => (from productCategory in productCategories

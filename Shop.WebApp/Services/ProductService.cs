@@ -7,7 +7,6 @@ namespace Shop.WebApp.Services
     public class ProductService : IProductService
     {
         readonly HttpClient _httpClient;
-
         readonly ILogger<ProductService> _logger;
 
         public ProductService(HttpClient httpClient, ILogger<ProductService> logger)
