@@ -27,21 +27,22 @@ namespace Shop.Shared.Entities
         /// </summary>
         public string Description { get; set; }
 
-        /*/// <summary>
-        ///     Gets or sets the URL of the product's image.
+        /// <summary>
+        ///     This method is used to get the URL of the image for the product from the storage container.
         /// </summary>
-        public string ImageURL { get; set; }*/
+        [NotMapped]
+        public string ImageURL { get; set; }
 
         /// <summary>
         ///  Gets or sets the collection of images for the product.
         /// </summary>
-        public ICollection<ProductImage>? ProductImages { get; set; }
+        public ICollection<ProductImage>? Images { get; set; }
 
         /// <summary>
         ///     Gets or sets the price of the product.
         /// </summary>
 
-        [Column(TypeName = "money")] // This is a SQL Server specific data type that maps to the .NET decimal type.
+        [Column(TypeName = "money")]// This is a SQL Server specific data type that maps to the .NET decimal type.
         public decimal Price { get; set; }
 
         /// <summary>
@@ -54,7 +55,7 @@ namespace Shop.Shared.Entities
         ///     Gets or sets the identifier of the category that the product belongs to.
         /// </summary>
         [ForeignKey("CategoryId")]
-        public Guid CategoryId { get; set; }
+        public int CategoryId { get; set; }
 
         /// <summary>
         /// Navigation property for the relationship with the category.

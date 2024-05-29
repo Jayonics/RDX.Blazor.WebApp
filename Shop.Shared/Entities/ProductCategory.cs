@@ -15,7 +15,7 @@ namespace Shop.Shared.Entities
         ///     Gets or sets the unique identifier for the product category.
         /// </summary>
         [Key]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         ///     Gets or sets the name of the product category.

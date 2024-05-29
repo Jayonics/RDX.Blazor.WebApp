@@ -111,6 +111,38 @@ namespace Shop.API.Repositories
             return files;
         }
 
+        public async Task<BlobDto> GetAsync(string blobFilename)
+        {
+            // Get a reference to a container named in appsettings.json
+            BlobContainerClient client = new BlobContainerClient(_storageConnectionString, _storageContainerName);
+
+            try
+            {
+                // Get a reference to the blob
+                BlobClient file = client.GetBlobClient(blobFilename);
+
+                // Check if the file exists in the container
+                if (await file.ExistsAsync())
+                {
+                    return new BlobDto
+                    {
+                        Uri = file.Uri.AbsoluteUri,
+                        Name = file.Name,
+                        ContentType = file.GetProperties().Value.ContentType,
+                    };
+                }
+            }
+            catch (RequestFailedException ex)
+            when(ex.ErrorCode == BlobErrorCode.BlobNotFound)
+            {
+                // Log error to console
+                _logger.LogError($"File {blobFilename} was not found.");
+            }
+
+            // File does not exist, return null and handle that in requesting method
+            return null;
+        }
+
         public async Task<BlobResponseDto> UploadAsync(IFormFile blob)
         {
             // Create new upload response object that we can return to the requesting method

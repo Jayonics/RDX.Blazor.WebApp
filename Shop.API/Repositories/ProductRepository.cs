@@ -2,6 +2,7 @@
 using Shop.Shared.Data;
 using Shop.Shared.Entities;
 using Shop.API.Repositories.Contracts;
+using Microsoft.Extensions.Configuration;
 
 namespace Shop.API.Repositories
 {
@@ -12,9 +13,12 @@ namespace Shop.API.Repositories
 
         readonly ShopDbContext shopDbContext;
 
-        public ProductRepository(ShopDbContext shopDbContext, ILogger<ProductRepository> logger)
+        readonly IConfiguration _configuration;
+
+        public ProductRepository(ShopDbContext shopDbContext, ILogger<ProductRepository> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
             this.shopDbContext = shopDbContext;
         }
 
@@ -32,13 +36,45 @@ namespace Shop.API.Repositories
 
         public async Task<Product> GetProduct(int id)
         {
-            var product = await shopDbContext.Products.FindAsync(id);
+            var product = await shopDbContext.Products
+                .Include(p => p.Images)// Include the Images when retrieving the Product
+                .Include(p => p.Category)
+                .Select(p => new Product
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    Quantity = p.Quantity,
+                    CategoryId = p.CategoryId,
+                    Category = p.Category,
+                    Images = p.Images,
+                    // If Images is not null, set the ImageURL to the first image in the collection, otherwise use the placeholder image
+                    ImageURL = p.Images.Count != 0 ? _configuration["Storage:BlobContainerURL"] + "/" + p.Images.FirstOrDefault().Name : "https://via.placeholder.com/150"
+                })
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             return product;
         }
 
         public async Task<IEnumerable<Product>> GetProducts()
         {
-            var products = await shopDbContext.Products.ToListAsync();
+            var products = await shopDbContext.Products
+                .Include(p => p.Images)
+                .Include(p => p.Category)
+                .Select(p => new Product
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    Quantity = p.Quantity,
+                    CategoryId = p.CategoryId,
+                    Category = p.Category,
+                    Images = p.Images,
+                    ImageURL = p.Images.Count != 0 ? _configuration["Storage:BlobContainerURL"] + "/" + p.Images.FirstOrDefault().Name : "https://via.placeholder.com/100"
+                })
+                .ToListAsync();
 
             return products;
         }

@@ -30,5 +30,12 @@ namespace Shop.API.Repositories.Contracts
         /// </summary>
         /// <returns>Blobs in a list</returns>
         Task<List<BlobDto>> ListAsync();
+
+        /// <summary>
+        /// This method returns the properties of a file with the specified filename
+        /// </summary>
+        /// <param name="blobFilename">Filename</param>
+        /// <returns>BlobDto</returns>
+        Task<BlobDto> GetAsync(string blobFilename);
     }
 }

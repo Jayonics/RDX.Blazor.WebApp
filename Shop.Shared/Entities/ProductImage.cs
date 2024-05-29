@@ -18,7 +18,7 @@ namespace Shop.Shared.Entities
         /// Gets or sets the unique identifier for the product image.
         /// </summary>
         [Key]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the foreign key for the relationship with the product.

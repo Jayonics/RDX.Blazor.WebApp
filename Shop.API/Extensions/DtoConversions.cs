@@ -38,7 +38,7 @@ namespace Shop.API.Extensions
         /// <param name="product">The Product entity to convert.</param>
         /// <param name="productCategory">The ProductCategory entity to use for category information.</param>
         /// <returns>A ProductDto object.</returns>
-        public static ProductDto ConvertToDto(this Product product, ProductCategory productCategory, string baseImageUrl = null) => new()
+        public static ProductDto ConvertToDto(this Product product, ProductCategory productCategory) => new()
         {
             Id = product.Id,
             Name = product.Name,

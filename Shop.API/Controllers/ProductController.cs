@@ -50,7 +50,7 @@ namespace Shop.API.Controllers
                     return NotFound();
                 }
                 // Convert the products to DTOs using the fetched categories
-                var productDtos = products.ConvertToDto(productCategories, _configuration["Storage:BlobContainerURL"]);
+                var productDtos = products.ConvertToDto(productCategories);
 
                 // Return the converted DTOs with an Ok status
                 return Ok(productDtos);
@@ -73,7 +73,7 @@ namespace Shop.API.Controllers
             var productCategory = await _productRepository.GetCategory(product.CategoryId);
             if (productCategory == null) return NotFound();
 
-            var productDto = product.ConvertToDto(productCategory, _configuration["Storage:BlobContainerURL"]);
+            var productDto = product.ConvertToDto(productCategory);
             return Ok(productDto);
         }
 

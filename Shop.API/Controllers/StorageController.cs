@@ -46,7 +46,9 @@ namespace Shop.API.Controllers
             }
         }
 
-        [HttpGet("{filename}")]
+        // Rename the Endpoint to Download
+        [HttpGet("Download/{filename}")]
+        [ActionName("Download")]
         public async Task<ActionResult<BlobDto>> Download([FromRoute]string filename)
         {
             BlobDto? file = await _storage.DownloadAsync(filename);
@@ -64,9 +66,69 @@ namespace Shop.API.Controllers
             }
         }
 
+        // Get the properties of a file without downloading it
+        /*[HttpGet("Get/{filename}")]
+        [ActionName("Get")]
+        public async Task<ActionResult<BlobDto>> Get([FromRoute]string filename)
+        {
+            BlobDto? file = await _storage.GetAsync(filename);
+
+            // Check if file was found
+            if (file == null)
+            {
+                // Was not, return error message to client
+                return StatusCode(StatusCodes.Status500InternalServerError, $"File {filename} could not be found.");
+            }
+            else
+            {
+                // File was found, return it to client
+                return Ok(file);
+            }
+        }*/
+        // A dual role endpoint that allows for both downloading and getting file properties using the same endpoint
+        // and a query parameter to determine the action
+        [HttpGet("{filename}")]
+        public async Task<ActionResult<BlobDto>> Get([FromRoute]string filename, [FromQuery]bool download = false)
+        {
+            // Unescape the filename
+            filename = Uri.UnescapeDataString(filename);
+
+            if (download)
+            {
+                // Download the file
+                BlobDto? file = await _storage.DownloadAsync(filename);
+
+                // Check if file was found
+                if (file == null)
+                {
+                    // Was not, return error message to client
+                    return StatusCode(StatusCodes.Status500InternalServerError, $"File {filename} could not be found.");
+                }
+
+                // Return the file for download
+                return File(file.Content, file.ContentType, file.Name);
+            }
+            else
+            {
+                // Get the properties of the file
+                BlobDto? file = await _storage.GetAsync(filename);
+
+                // Check if file was found
+                if (file == null)
+                {
+                    // Was not, return error message to client
+                    return StatusCode(StatusCodes.Status500InternalServerError, $"File {filename} could not be found.");
+                }
+
+                // Return the file properties
+                return Ok(file);
+            }
+        }
+
         [HttpDelete("{filename}")]
         public async Task<ActionResult<BlobResponseDto>> Delete([FromRoute]string filename)
         {
+            // Unescape the filename
             BlobResponseDto response = await _storage.DeleteAsync(filename);
 
             // Check if we got an error
