@@ -17,7 +17,7 @@ namespace Shop.API.Extensions
         /// <param name="productCategories">The collection of ProductCategory entities to use for category information.</param>
         /// <returns>A collection of ProductDto objects.</returns>
         public static IEnumerable<ProductDto> ConvertToDto(this IEnumerable<Product> products,
-            IEnumerable<ProductCategory> productCategories, string baseImageUrl = null) => (from product in products
+            IEnumerable<ProductCategory> productCategories) => (from product in products
                                                                 join productCategory in productCategories
                                                                 on product.CategoryId equals productCategory.Id
                                                                 select new ProductDto
