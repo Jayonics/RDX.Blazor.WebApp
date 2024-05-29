@@ -71,15 +71,6 @@ namespace Shop.API.Extensions
             CategoryId = productDto.CategoryId
         };
 
-        // ApplicationUser conversions
-        public static IEnumerable<UserDto> ConvertToDto(this IEnumerable<ApplicationUser> users) => (from user in users
-                                                                                                    select new UserDto
-                                                                                                    {
-                                                                                                        Id = user.Id,
-                                                                                                        UserName = user.UserName,
-                                                                                                        Email = user.Email
-                                                                                                    }).ToList();
-
         // ProductCategory conversions
         public static IEnumerable<ProductCategoryDto> ConvertToDto(this IEnumerable<ProductCategory> productCategories) => (from productCategory in productCategories
                                                                                                                             select new ProductCategoryDto
