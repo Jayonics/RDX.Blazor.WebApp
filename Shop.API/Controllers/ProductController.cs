@@ -98,7 +98,7 @@ namespace Shop.API.Controllers
             var productCategory = await _productRepository.GetCategory(product.CategoryId);
             if (productCategory == null) return NotFound();
 
-            var updatedProductDto = product.ConvertToDto(productCategory, _configuration["Storage:BlobContainerURL"]);
+            var updatedProductDto = product.ConvertToDto(productCategory);
             return Ok(updatedProductDto);
         }
 
@@ -145,7 +145,7 @@ namespace Shop.API.Controllers
                 {
                     var product = await _productRepository.AddProduct(productDto.ConvertToEntity());
                     var productCategory = await _productRepository.GetCategory(product.CategoryId);
-                    return Ok(product.ConvertToDto(productCategory, _configuration["Storage:BlobContainerURL"]));
+                    return Ok(product.ConvertToDto(productCategory));
 
                 }
                 catch (Exception exception)
