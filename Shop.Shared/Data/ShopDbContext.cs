@@ -26,9 +26,6 @@ namespace Shop.Shared.Data
             var electronicsId = 3;
             var shoesId = 4;
 
-            var image1Id = 1;
-            var image2Id = 2;
-
             //Add Product Categories
             modelBuilder.Entity<ProductCategory>().HasData(new ProductCategory
             {
@@ -56,28 +53,24 @@ namespace Shop.Shared.Data
                 Id = 1,
                 Name = "Beauty/Beauty1.png",
                 ProductId = 1, // assuming this product exists
-                StorageContainers = new[] { StorageContainers.shop }
             });
             modelBuilder.Entity<ProductImage>().HasData(new ProductImage
             {
                 Id = 2,
                 Name = "Beauty/Beauty2.png",
                 ProductId = 1, // assuming this product exists
-                StorageContainers = new[] { StorageContainers.shop }
             });
             modelBuilder.Entity<ProductImage>().HasData(new ProductImage
             {
                 Id = 3,
                 Name = "Beauty2.png",
                 ProductId = 2, // assuming this product exists
-                StorageContainers = new[] { StorageContainers.shop }
             });
             modelBuilder.Entity<ProductImage>().HasData(new ProductImage
             {
                 Id = 4,
                 Name = "Beauty3.png",
                 ProductId = 3, // assuming this product exists
-                StorageContainers = new[] { StorageContainers.shop }
             });
 
 
