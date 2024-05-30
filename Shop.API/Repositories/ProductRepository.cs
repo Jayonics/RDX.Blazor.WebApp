@@ -3,6 +3,7 @@ using Shop.Shared.Data;
 using Shop.Shared.Entities;
 using Shop.API.Repositories.Contracts;
 using Microsoft.Extensions.Configuration;
+using Shop.Shared.Extensions;
 
 namespace Shop.API.Repositories
 {
@@ -50,7 +51,7 @@ namespace Shop.API.Repositories
                     Category = p.Category,
                     Images = p.Images,
                     // If Images is not null, set the ImageURL to the first image in the collection, otherwise use the placeholder image
-                    ImageURL = p.Images.Count != 0 ? _configuration["Storage:BlobContainerURL"] + "/" + p.Images.FirstOrDefault().Name : "https://via.placeholder.com/150"
+                    ImageURL = p.Images.Count != 0 ? p.Images.FirstOrDefault().Name.FormatImageUrl(_configuration["Storage:BlobContainerURL"]) : "https://via.placeholder.com/150"
                 })
                 .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -72,7 +73,7 @@ namespace Shop.API.Repositories
                     CategoryId = p.CategoryId,
                     Category = p.Category,
                     Images = p.Images,
-                    ImageURL = p.Images.Count != 0 ? _configuration["Storage:BlobContainerURL"] + "/" + p.Images.FirstOrDefault().Name : "https://via.placeholder.com/100"
+                    ImageURL = p.Images.Any() ? p.Images.FirstOrDefault().Name.FormatImageUrl(_configuration["Storage:BlobContainerURL"]) : "https://via.placeholder.com/100"
                 })
                 .ToListAsync();
 
