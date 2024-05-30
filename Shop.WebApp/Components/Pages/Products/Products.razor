@@ -1,0 +1,80 @@
+﻿@page "/products"
+@using Shop.WebApp.Services.Contracts
+@inject IProductService ProductService
+@inject NavigationManager NavigationManager
+
+@if (ProductList == null)
+{
+    <div class="spinner-border text-info" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <div class="container">
+        <h3 class="mb-5">Products</h3>
+        <AuthorizeView Roles="Admin,Staff">
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    Admin Actions
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li>
+                        <a class="dropdown-item" href="#">Add a category</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">Another action</a>
+                    </li>
+                </ul>
+            </div>
+        </AuthorizeView>
+    </div>
+
+    var productCount = ProductList.Count();
+
+    if (productCount > 0)
+    {
+        <div class="row mt-3">
+            <AuthorizeView Roles="Admin,Staff">
+                <div class="col-md-3 mb-2" @onclick='() => NavigationManager.NavigateTo("/addproduct")'>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                Add Product
+                            </h5>
+                        </div>
+                    </div>
+                    @* <button class="btn btn-primary" @onclick='() => NavigationManager.NavigateTo("/add-product")'>Add Product</button> *@
+                </div>
+            </AuthorizeView>
+            @foreach (var productGroup in GetGroupedProductsByCategory())
+            {
+                <h4>@GetCategoryName(productGroup)</h4>
+                <div class="row mt-3">
+                    <DisplayProducts Products="@productGroup.Take(4)"/>
+                </div>
+                <hr class="mb-3"/>
+            }
+        </div>
+    }
+}
+
+@code {
+    public IEnumerable<ProductDto> ProductList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ProductList = await ProductService.GetProducts();
+    }
+
+    protected IOrderedEnumerable<IGrouping<int, ProductDto>> GetGroupedProductsByCategory() => from product in ProductList
+                                                                                               group product by product.CategoryId
+                                                                                               into productByCategoryGroup
+                                                                                               orderby productByCategoryGroup.Key
+                                                                                               select productByCategoryGroup;
+
+    protected string GetCategoryName(IGrouping<int, ProductDto> groupedProductDtos)
+    {
+        return groupedProductDtos.FirstOrDefault(pg => pg.CategoryId == groupedProductDtos.Key).CategoryName;
+    }
+}

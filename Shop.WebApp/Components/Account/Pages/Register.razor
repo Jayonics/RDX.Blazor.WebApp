@@ -1,11 +1,10 @@
 ﻿@page "/Account/Register"
-
 @using System.ComponentModel.DataAnnotations
 @using System.Text
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-@using Shop.WebApp.Data
+@using Shop.Shared.Entities
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -59,10 +58,10 @@
     private IEnumerable<IdentityError>? identityErrors;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private InputModel Input { get; } = new();
 
     [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
+    private string? ReturnUrl { get; }
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
@@ -96,10 +95,11 @@
         {
             RedirectManager.RedirectTo(
             "Account/RegisterConfirmation",
-            new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            new Dictionary<string, object?>
+            { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
         }
 
-        await SignInManager.SignInAsync(user, isPersistent: false);
+        await SignInManager.SignInAsync(user, false);
         RedirectManager.RedirectTo(ReturnUrl);
     }
 

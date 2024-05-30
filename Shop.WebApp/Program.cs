@@ -3,82 +3,102 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shop.WebApp.Components;
 using Shop.WebApp.Components.Account;
-using Shop.WebApp.Data;
+using Shop.Shared.Data;
+using Shop.Shared.Entities;
 using Shop.WebApp.Services;
 using Shop.WebApp.Services.Contracts;
 
-namespace Shop.WebApp;
-
-public class Program
+namespace Shop.WebApp
 {
-    public static void Main(string[] args)
+    public class Program
     {
-        var builder = WebApplication.CreateBuilder(args);
-
-        // Add services to the container.
-        builder.Services.AddRazorComponents()
-        .AddInteractiveServerComponents();
-
-        builder.Services.AddCascadingAuthenticationState();
-        builder.Services.AddScoped<IdentityUserAccessor>();
-        builder.Services.AddScoped<IdentityRedirectManager>();
-        builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
-        builder.Services.AddAuthentication(options => {
-            options.DefaultScheme = IdentityConstants.ApplicationScheme;
-            options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-        })
-        .AddIdentityCookies();
-
-        // Get the machine name
-        var computerName = Environment.MachineName;
-// Select the connection string based on the machine name
-        var connectionString = computerName switch
+        public static void Main(string[] args)
         {
-            "INF-LAP-MSI1" => builder.Configuration.GetConnectionString("DevDatabaseConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."),
-            "JH-WIN-PC1" => builder.Configuration.GetConnectionString("TestDatabaseConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."),
-            _ => builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")
-        };
+            var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
-        options.UseSqlServer(connectionString));
-        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+            // Add the BlazorBoostrap Service to the container (NuGet package).
+            builder.Services.AddBlazorBootstrap();
 
-        builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-        .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddSignInManager()
-        .AddDefaultTokenProviders();
+            // Add services to the container.
+            builder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents();
 
-        builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+            builder.Services.AddCascadingAuthenticationState();
+            builder.Services.AddScoped<IdentityUserAccessor>();
+            builder.Services.AddScoped<IdentityRedirectManager>();
+            builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
-        builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7015/") });
-        builder.Services.AddScoped<IProductService, ProductService>();
+            // Get the machine name
+            var computerName = Environment.MachineName;
 
-        var app = builder.Build();
+            builder.Configuration
+            .AddJsonFile("appsettings.json")
+            .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+            .AddJsonFile($"appsettings.{computerName}.json", optional: true)
+            .AddEnvironmentVariables();
 
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseMigrationsEndPoint();
+            // Select the connection string based on the machine name
+            var connectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
+
+            builder.Services.AddDbContextPool<UserDbContext>(options =>
+            options.UseSqlServer(connectionString));
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+            .AddEntityFrameworkStores<UserDbContext>()
+            .AddSignInManager()
+            .AddDefaultTokenProviders();
+
+            builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7015/") });
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
+            builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
+
+            builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
+
+            builder.Services.AddCascadingAuthenticationState();
+            // Admin only
+            builder.Services.AddAuthorization(options => {
+                options.AddPolicy("Admin", configurePolicy: policy => policy.RequireRole("Admin"));
+            });
+            // Staff only
+            builder.Services.AddAuthorization(options => {
+                options.AddPolicy("Staff", configurePolicy: policy => policy.RequireRole("Staff"));
+            });
+            // Admin or Staff
+            builder.Services.AddAuthorization(options => {
+                options.AddPolicy("AdminOrStaff", configurePolicy: policy => policy.RequireRole("Admin", "Staff"));
+            });
+
+
+            var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseMigrationsEndPoint();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+
+            app.UseStaticFiles();
+            app.UseAntiforgery();
+
+            app.MapRazorComponents<App>()
+            .AddInteractiveServerRenderMode();
+
+            // Add additional endpoints required by the Identity /Account Razor components.
+            app.MapAdditionalIdentityEndpoints();
+
+            app.Run();
         }
-        else
-        {
-            app.UseExceptionHandler("/Error");
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            app.UseHsts();
-        }
-
-        app.UseHttpsRedirection();
-
-        app.UseStaticFiles();
-        app.UseAntiforgery();
-
-        app.MapRazorComponents<App>()
-        .AddInteractiveServerRenderMode();
-
-        // Add additional endpoints required by the Identity /Account Razor components.
-        app.MapAdditionalIdentityEndpoints();
-
-        app.Run();
     }
 }

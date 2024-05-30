@@ -1,27 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Shop.API.Data;
-using Shop.API.Entities;
+using Shop.Shared.Data;
+using Shop.Shared.Entities;
 using Shop.API.Repositories.Contracts;
 
 namespace Shop.API.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository(UserDbContext dbContext) : IUserRepository
     {
-        private readonly ShopDbContext shopDbContext;
 
-        public UserRepository(ShopDbContext shopDbContext)
-        {
-            this.shopDbContext = shopDbContext;
-        }
+        public Task<ApplicationUser> GetUser(int id) => throw new NotImplementedException();
 
-        public Task<User> GetUser(int id)
+        public async Task<IEnumerable<ApplicationUser>> GetUsers()
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task<IEnumerable<User>> GetUsers()
-        {
-            var users = await this.shopDbContext.Users.ToListAsync();
+            var users = await dbContext.Users.ToListAsync();
 
             return users;
         }

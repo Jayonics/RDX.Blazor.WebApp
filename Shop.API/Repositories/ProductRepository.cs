@@ -1,39 +1,155 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Shop.API.Data;
-using Shop.API.Entities;
+using Shop.Shared.Data;
+using Shop.Shared.Entities;
 using Shop.API.Repositories.Contracts;
+using Microsoft.Extensions.Configuration;
 
 namespace Shop.API.Repositories
 {
     public class ProductRepository : IProductRepository
     {
-        private readonly ShopDbContext shopDbContext;
 
-        public ProductRepository(ShopDbContext shopDbContext)
+        readonly ILogger _logger;
+
+        readonly ShopDbContext shopDbContext;
+
+        readonly IConfiguration _configuration;
+
+        public ProductRepository(ShopDbContext shopDbContext, ILogger<ProductRepository> logger, IConfiguration configuration)
         {
+            _logger = logger;
+            _configuration = configuration;
             this.shopDbContext = shopDbContext;
         }
+
         public async Task<IEnumerable<ProductCategory>> GetCategories()
         {
-            var categories = await this.shopDbContext.ProductCategories.ToListAsync();
+            var categories = await shopDbContext.ProductCategories.ToListAsync();
             return categories;
         }
 
-        public Task<ProductCategory> GetCategory(int id)
+        public async Task<ProductCategory> GetCategory(int id)
         {
-            throw new NotImplementedException();
+            var category = await shopDbContext.ProductCategories.FindAsync(id);
+            return category;
         }
 
-        public Task<Product> GetItem(int id)
+        public async Task<Product> GetProduct(int id)
         {
-            throw new NotImplementedException();
+            var product = await shopDbContext.Products
+                .Include(p => p.Images)// Include the Images when retrieving the Product
+                .Include(p => p.Category)
+                .Select(p => new Product
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    Quantity = p.Quantity,
+                    CategoryId = p.CategoryId,
+                    Category = p.Category,
+                    Images = p.Images,
+                    // If Images is not null, set the ImageURL to the first image in the collection, otherwise use the placeholder image
+                    ImageURL = p.Images.Count != 0 ? _configuration["Storage:BlobContainerURL"] + "/" + p.Images.FirstOrDefault().Name : "https://via.placeholder.com/150"
+                })
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            return product;
         }
 
-        public async Task<IEnumerable<Product>> GetItems()
+        public async Task<IEnumerable<Product>> GetProducts()
         {
-            var products = await this.shopDbContext.Products.ToListAsync();
+            var products = await shopDbContext.Products
+                .Include(p => p.Images)
+                .Include(p => p.Category)
+                .Select(p => new Product
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    Quantity = p.Quantity,
+                    CategoryId = p.CategoryId,
+                    Category = p.Category,
+                    Images = p.Images,
+                    ImageURL = p.Images.Count != 0 ? _configuration["Storage:BlobContainerURL"] + "/" + p.Images.FirstOrDefault().Name : "https://via.placeholder.com/100"
+                })
+                .ToListAsync();
 
             return products;
+        }
+
+        public async Task<Product> UpdateProduct(Product product)
+        {
+            var existingProduct = await shopDbContext.Products.FindAsync(product.Id);
+            if (existingProduct == null) throw new ArgumentException($"Product with ID {product.Id} not found.");
+
+            try
+            {
+                shopDbContext.Entry(existingProduct).CurrentValues.SetValues(product);
+            }
+            catch (ArgumentException argEx)
+            {
+                // Handle the exception (log it, rethrow it, etc.)
+                throw new Exception("An error occurred while updating the product.", argEx);
+            }
+
+            try
+            {
+                await shopDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and return null or throw an exception
+                throw new Exception("An error occurred while saving changes to the database.", ex);
+            }
+
+            return existingProduct;
+        }
+
+        public async Task<bool> DeleteProduct(int id)
+        {
+            var product = await shopDbContext.Products.FindAsync(id);
+            if (product == null) return false;
+
+            try
+            {
+                shopDbContext.Products.Remove(product);
+                await shopDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and return false or throw an exception
+                throw new Exception("An error occurred while deleting the product.", ex);
+            }
+
+            return true;
+        }
+
+        public async Task<Product> AddProduct(Product product)
+        {
+            _logger.LogDebug($"Attempting to add product {product.Name} to the database.");
+            try
+            {
+                // Log a warning if the product ID is not 0 or null
+                if (product.Id is not 0)
+                // Log a warning
+                    _logger.LogWarning(
+                    "The product ID must be equivalent to 0 or null to ensure a new ID is generated.\n " +
+                    "The product ID was not 0 or null.");
+
+                // Strip the ID from the product to ensure a new ID is generated
+                product.Id = 0;
+
+                await shopDbContext.Products.AddAsync(product);
+                await shopDbContext.SaveChangesAsync();
+                return product;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and return null or throw an exception
+                throw new Exception("An error occurred while adding the product.", ex);
+            }
         }
     }
 }

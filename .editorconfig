@@ -1,10 +1,9 @@
-
 [*]
 
 # Microsoft .NET properties
 csharp_indent_braces = false
 csharp_new_line_before_members_in_object_initializers = false
-csharp_new_line_before_open_brace = accessors,anonymous_types,control_blocks,events,indexers,local_functions,methods,object_collection_array_initalizers,properties,types
+csharp_new_line_before_open_brace = accessors, anonymous_types, control_blocks, events, indexers, local_functions, methods, object_collection_array_initalizers, properties, types
 csharp_preferred_modifier_order = protected, override, private, internal, file, new, public, abstract, virtual, sealed, async, readonly, extern, unsafe, volatile, static, required:suggestion
 csharp_preserve_single_line_blocks = true
 csharp_style_namespace_declarations = block_scoped:suggestion
@@ -30,7 +29,7 @@ resharper_csharp_wrap_arguments_style = chop_if_long
 resharper_csharp_wrap_parameters_style = chop_if_long
 resharper_default_private_modifier = implicit
 resharper_indent_preprocessor_other = do_not_change
-resharper_instance_members_qualify_declared_in = 
+resharper_instance_members_qualify_declared_in =
 resharper_keep_existing_attribute_arrangement = true
 resharper_max_attribute_length_for_same_line = 10000
 resharper_method_or_operator_body = expression_body
