@@ -88,6 +88,9 @@ namespace Shop.API.Controllers
         // A dual role endpoint that allows for both downloading and getting file properties using the same endpoint
         // and a query parameter to determine the action
         [HttpGet("{filename}")]
+        //ProducesResponseType of a BlobDto for a successful request and a string for an error
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<BlobDto>> Get([FromRoute]string filename, [FromQuery]bool download = false)
         {
             // Unescape the filename

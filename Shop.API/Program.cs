@@ -100,5 +100,8 @@ app.MapControllers();
 /*// Map Identity Routes
 app.MapIdentityApi<ApplicationUser>();*/
 
+// Save the Swagger JSON file
+app.Services.SaveSwaggerJson();
+
 // Run the application
 app.Run();
