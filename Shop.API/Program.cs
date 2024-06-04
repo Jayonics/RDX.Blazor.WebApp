@@ -36,12 +36,18 @@ var connectionString = builder.Configuration.GetConnectionString("DatabaseConnec
 // Add a database context to the services with a connection pool
 builder.Services.AddDbContextPool<ShopDbContext>(options => {
     // Use SQL Server with the selected connection string
-    options.UseSqlServer(connectionString);
+    options
+    .UseSqlServer(connectionString)
+    .EnableDetailedErrors(true)
+    .EnableSensitiveDataLogging(true);
 });
 
 builder.Services.AddDbContextPool<UserDbContext>(options => {
     // Use SQL Server with the selected connection string
-    options.UseSqlServer(connectionString);
+    options
+    .UseSqlServer(connectionString)
+    .EnableDetailedErrors(true)
+    .EnableSensitiveDataLogging(true);
 });
 
 // Add the product repository to the services
