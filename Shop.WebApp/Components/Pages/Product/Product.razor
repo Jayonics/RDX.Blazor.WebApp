@@ -30,7 +30,16 @@ else
             <div class="row">
                 <div class="col  m-md-auto">
                     <div class="card-body">
-                        <img class="card-img img-fluid img-thumbnail" src="@product.ImageURL" alt="@product.Name"/>
+                        <div class="container-fluid">
+                            <!-- Display the image -->
+                            <img class="img-thumbnail img-fluid" src="@product.ImageURL" alt="Product Image"/>
+                            <AuthorizeView Roles="Admin, Staff">
+                                <div class="input-group">
+                                    <InputFile class="file-input" OnChange="OnChange" MaxFileSize="52428800" accept="image/png, image/jpeg, image/gif, image/heif image/heic" id="inputFile"/>
+                                    <button class="btn btn-primary" @onclick="UpdateProductImage">Upload</button>
+                                </div>
+                            </AuthorizeView>
+                        </div>
                     </div>
                 </div>
                 <div class="col">
@@ -162,8 +171,14 @@ else
 
     private string? Message { get; set; }
 
+
     [CascadingParameter]
     private AuthenticationState? AuthenticationState { get; set; }
+
+    public async Task<IEnumerable<ProductCategoryDto>> GetProductCategories()
+    {
+        return await ProductCategoryService.GetProductCategories();
+    }
 
 
     // Add Authorization restriction to this method
@@ -269,8 +284,47 @@ else
         await InvokeAsync(() => StateHasChanged());
     }
 
-    {
+    IBrowserFile image;
 
+    // Handle the file upload event and stream the file into a buffer
+    async Task OnChange(InputFileChangeEventArgs e)
+    {
+        image = e.File;
+    }
+
+    // Upload the image to the Azure Blob Storage
+    async Task UpdateProductImage()
+    {
+        if (image != null)
+        {
+            try
+            {
+                var result = await StorageService.UploadForceAsync(image);
+                if (result != null)
+                {
+                    product.Image = new ProductImageRequest()
+                    {
+                        Name = result.Blob.Name,
+                        ContentMD5 = null,
+                    };
+                    product.ImageURL = result.Blob.Uri;
+
+                    Message = "Image uploaded successfully";
+                    Logger.LogInformation("Image uploaded successfully");
+                    Logger.LogDebug("Image URL: {imageURL}", product.ImageURL);
+                    await InvokeAsync(() => StateHasChanged());
+                }
+                else
+                {
+                    Message = "Failed to upload image";
+                    Logger.LogError("Failed to upload image");
+                }
+            }
+            catch (Exception ex)
+            {
+                Message = "Failed to upload image";
+                Logger.LogError(ex, "Failed to upload image");
+            }
         }
     }
 

@@ -12,23 +12,23 @@
 
 <div class="container-fluid">
     <div class="card m-auto">
-        <EditForm Model="product" OnValidSubmit="() => AddNewProduct()" class="form" FormName="product">
-            <h4 class="card-header">Header Placeholder</h4>
-            <div class="row">
-                <div class="col  m-md-auto">
-                    <div class="card-body">
-                        <div class="custom-file">
-                            <InputFile class="file-input" OnChange="OnChange" MaxFileSize="52428800" accept="image/png, image/jpeg, image/gif" id="inputFile"/>
-                            <label for="file" class="form-label">Upload Image</label>
-                            <ValidationMessage For="@(() => product.ImageURL)" class="text-warning"/>
-                            <!-- Display the image -->
-                            <img class="card-img img-fluid img-thumbnail" src="@product.ImageURL" alt="Product Image"/>
-                        </div>
-                        <div class="input-group-append">
-                            <button class="btn btn-success" @onclick="UploadToAzureStorage">Upload</button>
-                        </div>
+        <h4 class="card-header">Header Placeholder</h4>
+        <div class="row">
+            <div class="col  m-md-auto">
+                <div class="card-body">
+                    <div class="container-fluid">
+                        <!-- Display the image -->
+                        <img class="img-thumbnail img-fluid" src="@ImageURL" alt="Product Image"/>
+                        <AuthorizeView Roles="Admin, Staff">
+                            <div class="input-group">
+                                <InputFile class="file-input" OnChange="OnChange" MaxFileSize="52428800" accept="image/png, image/jpeg, image/gif, image/heif image/heic" id="inputFile"/>
+                                <button class="btn btn-primary" @onclick="UploadToAzureStorage">Upload</button>
+                            </div>
+                        </AuthorizeView>
                     </div>
                 </div>
+            </div>
+            <EditForm Model="product" OnValidSubmit="() => AddNewProduct()" class="form" FormName="product">
                 <div class="col">
                     <div class="card-body">
                         <DataAnnotationsValidator/>
@@ -104,8 +104,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </EditForm>
+            </EditForm>
+        </div>
     </div>
 </div>
 
@@ -117,21 +117,21 @@
     [Parameter]
     public IEnumerable<ProductCategoryDto> productCategories { get; set; }
 
+    private string? ImageURL { get; set; } = "https://via.placeholder.com/150";
+
     private string? Message { get; set; }
 
     public async void AddNewProduct()
     {
-
         product.CategoryId = (product.CategoryId == 0) ? productCategories.First().Id : product.CategoryId;
-        if (string.IsNullOrWhiteSpace(product.ImageURL))
-        {
-            product.ImageURL = "https://via.placeholder.com/150";
-        }
 
         var result = await ProductService.AddProduct(product);
         if (result != null)
         {
             Message = "Product added successfully";
+            ImageURL = result.ImageURL;
+            // Navigate to the /product/{id} page
+            NavigationManager.NavigateTo($"/product/{result.Id}");
         }
         else
         {
@@ -152,15 +152,28 @@
     {
         if (image != null)
         {
-            var result = await AzureStorageService.UploadAsync(image);
-            if (result != null && !result.Error)
+            try
             {
-                product.ImageURL = result.Blob.Uri;
-                Logger.LogInformation("Image uploaded successfully");
+                var result = await StorageService.UploadAsync(image);
+                if (result != null)
+                {
+                    product.Image = new ProductImageRequest()
+                    {
+                        Name = result.Blob.Name,
+                        ContentMD5 = null,
+                    };
+                    ImageURL = result.Blob.Uri;
+
+                    Logger.LogInformation("Image uploaded successfully");
+                }
+                else
+                {
+                    Logger.LogError("Failed to upload image");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Logger.LogError("Failed to upload image");
+                Logger.LogError(ex, "Failed to upload image");
             }
         }
     }
