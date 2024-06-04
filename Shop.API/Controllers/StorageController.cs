@@ -9,11 +9,13 @@ namespace Shop.API.Controllers
     [ApiController]
     public class StorageController : ControllerBase
     {
-        private readonly IAzureStorageRepository _storage;
+        private readonly IStorageRepository _storage;
+        private readonly ILogger<StorageController> _logger;
 
-        public StorageController(IAzureStorageRepository storage)
+        public StorageController(IStorageRepository storage, ILogger<StorageController> logger)
         {
             _storage = storage;
+            _logger = logger;
         }
 
         [HttpGet()]
@@ -32,6 +34,26 @@ namespace Shop.API.Controllers
         public async Task<ActionResult<BlobResponseDto>> Upload(IFormFile file)
         {
             BlobResponseDto? response = await _storage.UploadAsync(file);
+
+            // Check if we got an error
+            if (response.Error == true)
+            {
+                // We got an error during upload, return an error with details to the client
+                return StatusCode(StatusCodes.Status500InternalServerError, response.Status);
+            }
+            else
+            {
+                // Return a success message to the client about successfull upload
+                return StatusCode(StatusCodes.Status200OK, response);
+            }
+        }
+
+        [HttpPut()]
+        // Set the maximum size of the request to 50MB
+        [RequestSizeLimit(bytes: 52428800)]
+        public async Task<ActionResult<BlobResponseDto>> UploadForce(IFormFile file)
+        {
+            BlobResponseDto? response = await _storage.UploadForceAsync(file);
 
             // Check if we got an error
             if (response.Error == true)
@@ -99,14 +121,12 @@ namespace Shop.API.Controllers
             if (download)
             {
                 // Download the file
-                BlobDto? file = await _storage.DownloadAsync(filename);
+                var file = await _storage.DownloadAsync(filename);
 
-                // Check if file was found
-                if (file == null)
-                {
-                    // Was not, return error message to client
-                    return StatusCode(StatusCodes.Status500InternalServerError, $"File {filename} could not be found.");
-                }
+                _logger.LogInformation($"File {file} was downloaded.");
+
+                // Attempt to read the stream
+
 
                 // Return the file for download
                 return File(file.Content, file.ContentType, file.Name);
@@ -114,7 +134,7 @@ namespace Shop.API.Controllers
             else
             {
                 // Get the properties of the file
-                BlobDto? file = await _storage.GetAsync(filename);
+                BlobDto file = await _storage.GetAsync(filename);
 
                 // Check if file was found
                 if (file == null)

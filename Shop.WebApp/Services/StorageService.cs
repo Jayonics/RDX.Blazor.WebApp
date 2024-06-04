@@ -1,16 +1,17 @@
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.IdentityModel.Tokens;
 using Shop.Models.Dtos;
 using Shop.WebApp.Services.Contracts;
 
 namespace Shop.WebApp.Services
 {
-    public class AzureStorageService : IAzureStorageService
+    public class StorageService : IStorageService
     {
 
         private readonly HttpClient _httpClient;
-        readonly ILogger<AzureStorageService> _logger;
+        readonly ILogger<StorageService> _logger;
 
-        public AzureStorageService(HttpClient httpClient, ILogger<AzureStorageService> logger)
+        public StorageService(HttpClient httpClient, ILogger<StorageService> logger)
         {
             _httpClient = httpClient;
             _logger = logger;
@@ -55,10 +56,36 @@ namespace Shop.WebApp.Services
 
             if (response.IsSuccessStatusCode)
             {
+                _logger.LogInformation($"Image upload reported successfull to the service.");
                 return await response.Content.ReadFromJsonAsync<BlobResponseDto>();
             }
+            else
+            {
+                _logger.LogError($"Image upload reported an error to the service.");
+                return null;
+            }
+        }
 
-            return null;
+        public async Task<BlobResponseDto> UploadForceAsync(IBrowserFile file)
+        {
+            // Convert IBrowserFile to IFormFile
+            IFormFile formFile = new FormFileFromBrowserFile(file);
+
+            var formData = new MultipartFormDataContent();
+            formData.Add(new StreamContent(formFile.OpenReadStream()), "file", formFile.FileName);
+
+            var response = await _httpClient.PutAsync("api/Storage", formData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogInformation($"Image upload reported successfull to the service.");
+                return await response.Content.ReadFromJsonAsync<BlobResponseDto>();
+            }
+            else
+            {
+                _logger.LogError($"Image upload reported an error to the service.");
+                return null;
+            }
         }
 
         public async Task<BlobResponseDto> UploadAsync(IFormFile file)
@@ -78,6 +105,20 @@ namespace Shop.WebApp.Services
 
         public async Task<BlobDto> DownloadAsync(string blobFilename)
         {
+            blobFilename = Uri.EscapeDataString(blobFilename);
+            var response = await _httpClient.GetAsync($"api/Storage/{blobFilename}?download=true");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<BlobDto>();
+            }
+
+            return null;
+        }
+
+        public async Task<BlobDto> GetAsync(string blobFilename)
+        {
+            blobFilename = Uri.EscapeDataString(blobFilename);
             var response = await _httpClient.GetAsync($"api/Storage/{blobFilename}");
 
             if (response.IsSuccessStatusCode)

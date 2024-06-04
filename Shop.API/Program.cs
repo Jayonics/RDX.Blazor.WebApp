@@ -53,12 +53,7 @@ builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository
 
 /* For the Azurite Storage Emulator */
 // With connection string
-builder.Services.AddAzureClients(clientBuilder => {
-    clientBuilder.AddBlobServiceClient(builder.Configuration["StorageConnectionString:blob"]!, preferMsi: true);
-    clientBuilder.AddQueueServiceClient(builder.Configuration["StorageConnectionString:queue"]!, preferMsi: true);
-});
-
-builder.Services.AddScoped<IAzureStorageRepository, AzureStorageRepository>();
+builder.Services.AddScoped<IStorageRepository, StorageRepository>();
 
 
 // Activate Identity APIs

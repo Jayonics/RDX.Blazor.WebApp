@@ -54,7 +54,7 @@ namespace Shop.WebApp
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7015/") });
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
-            builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
+            builder.Services.AddScoped<IStorageService, StorageService>();
 
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
