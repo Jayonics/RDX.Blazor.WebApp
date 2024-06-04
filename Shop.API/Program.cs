@@ -50,6 +50,8 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 // Add the product category repository to the services
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+// Add the MediaRepository to the services
+builder.Services.AddScoped<IMediaRepository, MediaRepository>();
 
 /* For the Azurite Storage Emulator */
 // With connection string
