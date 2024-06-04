@@ -10,34 +10,34 @@ namespace Shop.API.Repositories
     public class ProductRepository : IProductRepository
     {
 
-        readonly ILogger _logger;
-
-        readonly ShopDbContext shopDbContext;
-
-        readonly IConfiguration _configuration;
+        #region Dependency Injection / Constructor
+        private readonly ILogger<ProductRepository> _logger;
+        private readonly ShopDbContext _shopDbContext;
+        private readonly IConfiguration _configuration;
 
         public ProductRepository(ShopDbContext shopDbContext, ILogger<ProductRepository> logger, IConfiguration configuration)
         {
             _logger = logger;
             _configuration = configuration;
-            this.shopDbContext = shopDbContext;
+            _shopDbContext = shopDbContext;
         }
+        #endregion
 
         public async Task<IEnumerable<ProductCategory>> GetCategories()
         {
-            var categories = await shopDbContext.ProductCategories.ToListAsync();
+            var categories = await _shopDbContext.ProductCategories.ToListAsync();
             return categories;
         }
 
         public async Task<ProductCategory> GetCategory(int id)
         {
-            var category = await shopDbContext.ProductCategories.FindAsync(id);
+            var category = await _shopDbContext.ProductCategories.FindAsync(id);
             return category;
         }
 
         public async Task<Product> GetProduct(int id)
         {
-            var product = await shopDbContext.Products
+            var product = await _shopDbContext.Products
                 .Include(p => p.Images)// Include the Images when retrieving the Product
                 .Include(p => p.Category)
                 .Select(p => new Product
@@ -60,7 +60,7 @@ namespace Shop.API.Repositories
 
         public async Task<IEnumerable<Product>> GetProducts()
         {
-            var products = await shopDbContext.Products
+            var products = await _shopDbContext.Products
                 .Include(p => p.Images)
                 .Include(p => p.Category)
                 .Select(p => new Product
@@ -82,22 +82,22 @@ namespace Shop.API.Repositories
 
         public async Task<Product> UpdateProduct(Product product)
         {
-            var existingProduct = await shopDbContext.Products.FindAsync(product.Id);
+            var existingProduct = await _shopDbContext.Products.FindAsync(product.Id);
             if (existingProduct == null) throw new ArgumentException($"Product with ID {product.Id} not found.");
 
             try
             {
-                shopDbContext.Entry(existingProduct).CurrentValues.SetValues(product);
+                _shopDbContext.Entry(existingProduct).CurrentValues.SetValues(product);
             }
             catch (ArgumentException argEx)
             {
-                // Handle the exception (log it, rethrow it, etc.)
+                // Handle the exception
                 throw new Exception("An error occurred while updating the product.", argEx);
             }
 
             try
             {
-                await shopDbContext.SaveChangesAsync();
+                await _shopDbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -110,13 +110,13 @@ namespace Shop.API.Repositories
 
         public async Task<bool> DeleteProduct(int id)
         {
-            var product = await shopDbContext.Products.FindAsync(id);
+            var product = await _shopDbContext.Products.FindAsync(id);
             if (product == null) return false;
 
             try
             {
-                shopDbContext.Products.Remove(product);
-                await shopDbContext.SaveChangesAsync();
+                _shopDbContext.Products.Remove(product);
+                await _shopDbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -142,8 +142,8 @@ namespace Shop.API.Repositories
                 // Strip the ID from the product to ensure a new ID is generated
                 product.Id = 0;
 
-                await shopDbContext.Products.AddAsync(product);
-                await shopDbContext.SaveChangesAsync();
+                await _shopDbContext.Products.AddAsync(product);
+                await _shopDbContext.SaveChangesAsync();
                 return product;
             }
             catch (Exception ex)
