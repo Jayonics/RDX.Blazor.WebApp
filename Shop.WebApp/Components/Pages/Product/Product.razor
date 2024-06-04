@@ -1,5 +1,6 @@
 @page "/product/{Id}"
 @using Microsoft.AspNetCore.Authorization
+@using Shop.Models.Requests
 @using Shop.WebApp.Services.Contracts
 @rendermode InteractiveServer
 @inject IProductService ProductService
@@ -8,6 +9,7 @@
 @inject NavigationManager NavigationManager
 @inject IAuthorizationService AuthorizationService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IStorageService StorageService
 
 @if (product == null)
 {
@@ -29,7 +31,16 @@ else
             <div class="row">
                 <div class="col  m-md-auto">
                     <div class="card-body">
-                        <img class="card-img img-fluid img-thumbnail" src="@product.ImageURL" alt="@product.Name"/>
+                        <div class="container-fluid">
+                            <!-- Display the image -->
+                            <img class="img-thumbnail img-fluid" src="@product.ImageURL" alt="Product Image"/>
+                            <AuthorizeView Roles="Admin, Staff">
+                                <div class="input-group">
+                                    <InputFile class="file-input" OnChange="OnChange" MaxFileSize="52428800" accept="image/png, image/jpeg, image/gif, image/heif image/heic" id="inputFile"/>
+                                    <button class="btn btn-primary" @onclick="UpdateProductImage">Upload</button>
+                                </div>
+                            </AuthorizeView>
+                        </div>
                     </div>
                 </div>
                 <div class="col">
@@ -157,13 +168,18 @@ else
     [SupplyParameterFromQuery]
     private bool? EditMode { get; set; } = false;
 
-    [SupplyParameterFromQuery]
-    private bool? AddMode { get; set; } = false;
+    private string? ImageURL { get; set; } = "https://via.placeholder.com/150";
 
     private string? Message { get; set; }
 
+
     [CascadingParameter]
     private AuthenticationState? AuthenticationState { get; set; }
+
+    public async Task<IEnumerable<ProductCategoryDto>> GetProductCategories()
+    {
+        return await ProductCategoryService.GetProductCategories();
+    }
 
 
     // Add Authorization restriction to this method
@@ -249,6 +265,7 @@ else
             if (result != null)
             {
                 Message = "Product updated successfully";
+                ImageURL = result.ImageURL;
                 product = result;// Update the product with the returned result
             }
             else
@@ -268,42 +285,55 @@ else
         await InvokeAsync(() => StateHasChanged());
     }
 
-    /*[Authorize(Roles = "Admin, Staff")]
-    public async void AddProduct()
-    {
-        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
-        if (!authorizationResult.Succeeded)
-        {
-            Message = "You are not authorized to add products.";
-            Logger.LogWarning("User is not authorized to add products.");
-            Logger.LogDebug("User Details: {user}", AuthenticationState.User);
-            return;
-        }
+    IBrowserFile image;
 
-        try
+    // Handle the file upload event and stream the file into a buffer
+    async Task OnChange(InputFileChangeEventArgs e)
+    {
+        image = e.File;
+    }
+
+    // Upload the image to the Azure Blob Storage
+    async Task UpdateProductImage()
+    {
+        if (image != null)
         {
-            var result = await ProductService.AddProduct(product);
-            if (result != null)
+            try
             {
-                Message = "Product added successfully";
-                product = result;
+                var result = await StorageService.UploadForceAsync(image);
+                if (result != null)
+                {
+                    product.Image = new ProductImageRequest()
+                    {
+                        Name = result.Blob.Name,
+                        ContentMD5 = null,
+                    };
+                    product.ImageURL = result.Blob.Uri;
+
+                    Message = "Image uploaded successfully";
+                    Logger.LogInformation("Image uploaded successfully");
+                    Logger.LogDebug("Image URL: {imageURL}", product.ImageURL);
+                    await InvokeAsync(() => StateHasChanged());
+                }
+                else
+                {
+                    Message = "Failed to upload image";
+                    Logger.LogError("Failed to upload image");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Message = "Product add failed";
+                Message = "Failed to upload image";
+                Logger.LogError(ex, "Failed to upload image");
             }
         }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, $"Product add failed: {ex.Message}");
-            Message = $"Product add failed: {ex.Message}";
-        }
-    }*/
+    }
 
     protected override async Task OnInitializedAsync()
     {
         AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
+        productCategories = await GetProductCategories();
+        product = await ProductService.GetProduct(int.Parse(Id));
     }
 
     protected override async Task OnParametersSetAsync()
@@ -312,20 +342,10 @@ else
         var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
         if (!authorizationResult.Succeeded)
         {
-            AddMode = false;
             EditMode = false;
         }
 
-
-        if (AddMode == true)
-        {
-            product = new ProductDto();
-            productCategories = await ProductCategoryService.GetProductCategories();
-            product.CategoryId = productCategories.First().Id;
-
-            EditMode = true;
-        }
-        else
+        if (EditMode == true)
         {
             try
             {

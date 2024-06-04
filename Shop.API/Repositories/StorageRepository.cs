@@ -6,18 +6,24 @@ using Shop.Models.Dtos;
 
 namespace Shop.API.Repositories
 {
-    public class AzureStorageRepository : IAzureStorageRepository
+    public class StorageRepository : IStorageRepository
     {
+
         #region Dependency Injection / Constructor
 
         private readonly string _storageConnectionString;
-        private readonly string _storageContainerName;
-        private readonly ILogger<AzureStorageRepository> _logger;
 
-        public AzureStorageRepository(IConfiguration configuration, ILogger<AzureStorageRepository> logger)
+        private readonly string _storageContainerName;
+
+        private readonly ILogger<StorageRepository> _logger;
+
+        private readonly BlobContainerClient _blobContainerClient;
+
+        public StorageRepository(IConfiguration configuration, ILogger<StorageRepository> logger)
         {
             _storageConnectionString = configuration.GetValue<string>("Storage:StorageConnectionString");
             _storageContainerName = configuration.GetValue<string>("Storage:BlobContainerName");
+            _blobContainerClient = new BlobContainerClient(_storageConnectionString, _storageContainerName);
             _logger = logger;
         }
 
@@ -25,9 +31,8 @@ namespace Shop.API.Repositories
 
         public async Task<BlobResponseDto> DeleteAsync(string blobFilename)
         {
-            BlobContainerClient client = new BlobContainerClient(_storageConnectionString, _storageContainerName);
 
-            BlobClient file = client.GetBlobClient(blobFilename);
+            BlobClient file = _blobContainerClient.GetBlobClient(blobFilename);
 
             try
             {
@@ -35,7 +40,7 @@ namespace Shop.API.Repositories
                 await file.DeleteAsync();
             }
             catch (RequestFailedException ex)
-                when (ex.ErrorCode == BlobErrorCode.BlobNotFound)
+            when (ex.ErrorCode == BlobErrorCode.BlobNotFound)
             {
                 // File did not exist, log to console and return new response to requesting method
                 _logger.LogError($"File {blobFilename} was not found.");
@@ -50,12 +55,11 @@ namespace Shop.API.Repositories
         public async Task<BlobDto> DownloadAsync(string blobFilename)
         {
             // Get a reference to a container named in appsettings.json
-            BlobContainerClient client = new BlobContainerClient(_storageConnectionString, _storageContainerName);
 
             try
             {
                 // Get a reference to the blob uploaded earlier from the API in the container from configuration settings
-                BlobClient file = client.GetBlobClient(blobFilename);
+                BlobClient file = _blobContainerClient.GetBlobClient(blobFilename);
 
                 // Check if the file exists in the container
                 if (await file.ExistsAsync())
@@ -75,7 +79,7 @@ namespace Shop.API.Repositories
                 }
             }
             catch (RequestFailedException ex)
-                when(ex.ErrorCode == BlobErrorCode.BlobNotFound)
+            when (ex.ErrorCode == BlobErrorCode.BlobNotFound)
             {
                 // Log error to console
                 _logger.LogError($"File {blobFilename} was not found.");
@@ -90,7 +94,7 @@ namespace Shop.API.Repositories
             // Get a reference to a container named in appsettings.json
             BlobContainerClient container = new BlobContainerClient(_storageConnectionString, _storageContainerName);
 
-            // Create a new list object for 
+            // Create a new list object for
             List<BlobDto> files = new List<BlobDto>();
 
             await foreach (BlobItem file in container.GetBlobsAsync())
@@ -100,7 +104,8 @@ namespace Shop.API.Repositories
                 var name = file.Name;
                 var fullUri = $"{uri}/{name}";
 
-                files.Add(new BlobDto {
+                files.Add(new BlobDto
+                {
                     Uri = fullUri,
                     Name = name,
                     ContentType = file.Properties.ContentType
@@ -114,12 +119,11 @@ namespace Shop.API.Repositories
         public async Task<BlobDto> GetAsync(string blobFilename)
         {
             // Get a reference to a container named in appsettings.json
-            BlobContainerClient client = new BlobContainerClient(_storageConnectionString, _storageContainerName);
 
             try
             {
                 // Get a reference to the blob
-                BlobClient file = client.GetBlobClient(blobFilename);
+                BlobClient file = _blobContainerClient.GetBlobClient(blobFilename);
 
                 // Check if the file exists in the container
                 if (await file.ExistsAsync())
@@ -133,7 +137,7 @@ namespace Shop.API.Repositories
                 }
             }
             catch (RequestFailedException ex)
-            when(ex.ErrorCode == BlobErrorCode.BlobNotFound)
+            when (ex.ErrorCode == BlobErrorCode.BlobNotFound)
             {
                 // Log error to console
                 _logger.LogError($"File {blobFilename} was not found.");
@@ -148,18 +152,13 @@ namespace Shop.API.Repositories
             // Create new upload response object that we can return to the requesting method
             BlobResponseDto response = new();
 
-
-
-            // Get a reference to a container named in appsettings.json and then create it
-            BlobContainerClient container = new BlobContainerClient(_storageConnectionString, _storageContainerName);
-
             // Create the container if it does not exist
-            await container.CreateIfNotExistsAsync();
+            await _blobContainerClient.CreateIfNotExistsAsync();
 
             try
             {
                 // Get a reference to the blob just uploaded from the API in a container from configuration settings
-                BlobClient client = container.GetBlobClient(blob.FileName);
+                BlobClient client = _blobContainerClient.GetBlobClient(blob.FileName);
 
                 // Open a stream for the file we want to upload
                 await using (Stream? data = blob.OpenReadStream())
@@ -177,13 +176,13 @@ namespace Shop.API.Repositories
             }
             // If the file already exists, we catch the exception and do not upload it
             catch (RequestFailedException ex)
-                when (ex.ErrorCode == BlobErrorCode.BlobAlreadyExists)
+            when (ex.ErrorCode == BlobErrorCode.BlobAlreadyExists)
             {
                 _logger.LogError($"File with name {blob.FileName} already exists in container. Set another name to store the file in the container: '{_storageContainerName}.'");
                 response.Status = $"File with name {blob.FileName} already exists. Please use another name to store your file.";
                 response.Error = true;
                 return response;
-            } 
+            }
             // If we get an unexpected error, we catch it here and return the error message
             catch (RequestFailedException ex)
             {
@@ -196,6 +195,99 @@ namespace Shop.API.Repositories
 
             // Return the BlobUploadResponse object
             return response;
+        }
+
+                public async Task<BlobResponseDto> UploadForceAsync(IFormFile blob)
+        {
+            // Create new upload response object that we can return to the requesting method
+            BlobResponseDto response = new();
+
+            // Create the container if it does not exist
+            await _blobContainerClient.CreateIfNotExistsAsync();
+
+            try
+            {
+                // Get a reference to the blob just uploaded from the API in a container from configuration settings
+                BlobClient client = _blobContainerClient.GetBlobClient(blob.FileName);
+
+                // Open a stream for the file we want to upload
+                await using (Stream? data = blob.OpenReadStream())
+                {
+                    // Upload the file async
+                    await client.UploadAsync(data);
+                }
+
+                // Everything is OK and file got uploaded
+                response.Status = $"File {blob.FileName} Uploaded Successfully";
+                response.Error = false;
+                response.Blob.Uri = client.Uri.AbsoluteUri;
+                response.Blob.Name = client.Name;
+
+            }
+            // If the file already exists, we catch the exception and do not upload it
+            catch (RequestFailedException ex)
+            when (ex.ErrorCode == BlobErrorCode.BlobAlreadyExists)
+            {
+                _logger.LogWarning($"File with name {blob.FileName} already exists in container, overwriting file.");
+                try
+                {
+                    await _blobContainerClient.DeleteBlobIfExistsAsync(blob.FileName);
+                    BlobClient client = _blobContainerClient.GetBlobClient(blob.FileName);
+                    await using (Stream? data = blob.OpenReadStream())
+                    {
+                        await client.UploadAsync(data);
+                    }
+                    response.Status = $"File {blob.FileName} Uploaded Successfully";
+                    response.Error = false;
+                    response.Blob.Uri = client.Uri.AbsoluteUri;
+                    response.Blob.Name = client.Name;
+                }
+                catch (Exception e)
+                {
+                    response.Status = $"Error overwriting file: {e.Message}";
+                    response.Error = true;
+                    return response;
+                }
+            }
+            // If we get an unexpected error, we catch it here and return the error message
+            catch (RequestFailedException ex)
+            {
+                // Log error to console and create a new response we can return to the requesting method
+                _logger.LogError($"Unhandled Exception. ID: {ex.StackTrace} - Message: {ex.Message}");
+                response.Status = $"Unexpected error: {ex.StackTrace}. Check log with StackTrace ID.";
+                response.Error = true;
+                return response;
+            }
+
+            // Return the BlobUploadResponse object
+            return response;
+        }
+
+        // This method allows a raw byte array to be uploaded to the Azure Blob Storage
+        public async Task<BlobContentInfo> UploadAsync(string fileName, byte[] data)
+        {
+            // Get a reference to a container named in appsettings.json and then create it
+            BlobContainerClient container = new BlobContainerClient(_storageConnectionString, _storageContainerName);
+
+            // Create the container if it does not exist
+            await container.CreateIfNotExistsAsync();
+
+            // Get a reference to the blob just uploaded from the API in a container from configuration settings
+            BlobClient client = container.GetBlobClient(fileName);
+
+            // Upload the file async
+            return await client.UploadAsync(new MemoryStream(data));
+        }
+
+        public async Task<BlobProperties> GetPropertiesAsync(string blobFilename)
+        {
+            // Get a reference to a container named in appsettings.json
+
+            // Get a reference to the blob
+            BlobClient file = _blobContainerClient.GetBlobClient(blobFilename);
+
+            // Return the properties of the file
+            return await file.GetPropertiesAsync();
         }
     }
 }

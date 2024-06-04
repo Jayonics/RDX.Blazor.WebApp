@@ -4,6 +4,8 @@ using Shop.API.Extensions;
 using Shop.API.Repositories.Contracts;
 using Shop.Models.Dtos;
 using Shop.Models.Requests;
+using Shop.Shared.Entities;
+using Shop.Shared.Extensions;
 
 namespace Shop.API.Controllers
 {
@@ -14,19 +16,21 @@ namespace Shop.API.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        readonly ILogger _logger;
+        readonly ILogger<ProductController> _logger;
+
         readonly IProductRepository _productRepository;
-        private readonly IConfiguration _configuration;
+
+        private readonly IMediaRepository _mediaRepository;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProductController" /> class.
         /// </summary>
         /// <param name="productRepository">The product repository.</param>
-        public ProductController(IProductRepository productRepository, ILogger<ProductController> logger, IConfiguration configuration)
+        public ProductController(IProductRepository productRepository, ILogger<ProductController> logger, IMediaRepository mediaRepository)
         {
             _productRepository = productRepository;
             _logger = logger;
-            _configuration = configuration;
+            _mediaRepository = mediaRepository;
         }
 
         /// <summary>
@@ -41,16 +45,14 @@ namespace Shop.API.Controllers
             {
                 // Fetch all products from the repository
                 var products = await _productRepository.GetProducts();
-                // Fetch all product categories from the repository
-                var productCategories = await _productRepository.GetCategories();
 
                 // If either products or product categories are null, return a NotFound status
-                if (products == null || productCategories == null)
+                if (!products.Any())
                 {
                     return NotFound();
                 }
                 // Convert the products to DTOs using the fetched categories
-                var productDtos = products.ConvertToDto(productCategories);
+                var productDtos = products.ConvertToDto();
 
                 // Return the converted DTOs with an Ok status
                 return Ok(productDtos);
@@ -65,20 +67,17 @@ namespace Shop.API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ProductDto>> GetProduct([FromRoute]int id)
+        public async Task<ActionResult<ProductDto>> GetProduct([FromRoute] int id)
         {
             var product = await _productRepository.GetProduct(id);
             if (product == null) return NotFound();
 
-            var productCategory = await _productRepository.GetCategory(product.CategoryId);
-            if (productCategory == null) return NotFound();
-
-            var productDto = product.ConvertToDto(productCategory);
+            var productDto = product.ConvertToDto();
             return Ok(productDto);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<ProductDto>> UpdateProduct([FromRoute]int id, [FromBody]ProductDto productDto)
+        public async Task<ActionResult<ProductDto>> UpdateProduct([FromRoute] int id, [FromBody] ProductDto productDto)
         {
             if (id != productDto.Id) return BadRequest();
 
@@ -87,6 +86,50 @@ namespace Shop.API.Controllers
             try
             {
                 product = await _productRepository.UpdateProduct(product);
+
+                // Attempt to remove any existing ProductImages on the Product, then add the new ProductImage
+                try
+                {
+                    var productImages = await _mediaRepository.GetProductImagesAsync(product.Id);
+                    _logger.LogInformation($"Found {productImages.Count()} ProductImages for Product {product.Id}");
+                    if (productImages.Any())
+                    {
+                        _logger.LogInformation($"Attempting to delete {productImages.Count()} ProductImages for Product {product.Id}");
+                        await _mediaRepository.DeleteProductImagesAsync(product.Id);
+                        _logger.LogInformation($"Deleted {productImages.Count()} ProductImages for Product {product.Id}");
+                    }
+                    // Then add the new ProductImage
+                    if (productDto.Image != null)
+                    {
+                        var productImageRequest = new ProductImage
+                        {
+                            ProductId = product.Id,
+                            Name = productDto.Image.Name,
+                            ContentMD5 = productDto.Image.ContentMD5 ?? null
+                        };
+                        var productImage = await _mediaRepository.AddProductImageAsync(productImageRequest);
+                        _logger.LogInformation($"Added ProductImage {productImage.Id} to Product {product.Id}");
+                        _logger.LogInformation($"ProductImage Name: {productImage.Name}");
+                    }
+                }
+                catch
+                {
+                    // If no ProductImages are found, add a new ProductImage
+                    if (productDto.Image != null)
+                    {
+                        var productImageRequest = new ProductImage
+                        {
+                            ProductId = product.Id,
+                            Name = productDto.Image.Name,
+                            ContentMD5 = productDto.Image.ContentMD5 ?? null
+                        };
+                        var productImage = await _mediaRepository.AddProductImageAsync(productImageRequest);
+                        _logger.LogInformation($"Added ProductImage {productImage.Id} to Product {product.Id}");
+                    }
+                }
+
+
+                product = await _productRepository.GetProduct(product.Id);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -95,21 +138,18 @@ namespace Shop.API.Controllers
                 throw;
             }
 
-            var productCategory = await _productRepository.GetCategory(product.CategoryId);
-            if (productCategory == null) return NotFound();
-
-            var updatedProductDto = product.ConvertToDto(productCategory);
+            var updatedProductDto = product.ConvertToDto();
             return Ok(updatedProductDto);
         }
 
-        async Task<bool> ProductExists([FromRoute]int id)
+        async Task<bool> ProductExists([FromRoute] int id)
         {
             var product = await _productRepository.GetProduct(id);
             return product != null;
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult> DeleteProduct([FromRoute]int id)
+        public async Task<ActionResult> DeleteProduct([FromRoute] int id)
         {
             var product = await _productRepository.GetProduct(id);
             if (product == null) return NotFound();
@@ -129,7 +169,7 @@ namespace Shop.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> AddProduct([FromBody]NewProductDto productDto)
+        public async Task<ActionResult<ProductDto>> AddProduct([FromBody] NewProductDto productDto)
         {
             if (!ModelState.IsValid)
             {
@@ -144,8 +184,20 @@ namespace Shop.API.Controllers
                 try
                 {
                     var product = await _productRepository.AddProduct(productDto.ConvertToEntity());
-                    var productCategory = await _productRepository.GetCategory(product.CategoryId);
-                    return Ok(product.ConvertToDto(productCategory));
+                    if (productDto.Image != null)
+                    {
+                        // Perform the conversion of the ProductImageRequest to the ProductImage entity.
+                        var productImageRequest = new ProductImage
+                        {
+                            ProductId = product.Id,
+                            Name = productDto.Image.Name,
+                            ContentMD5 = productDto.Image.ContentMD5 ?? null
+                        };
+                        var productImage = await _mediaRepository.AddProductImageAsync(productImageRequest);
+                    }
+                    product = await _productRepository.GetProduct(product.Id);
+
+                    return Ok(product.ConvertToDto());
 
                 }
                 catch (Exception exception)

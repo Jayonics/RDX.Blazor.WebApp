@@ -1,6 +1,7 @@
 ﻿using Shop.Shared.Entities;
 using Shop.Models.Dtos;
 using Shop.Models.Requests;
+using Shop.Models.Responses;
 using Shop.Shared.Extensions;
 
 namespace Shop.API.Extensions
@@ -14,12 +15,8 @@ namespace Shop.API.Extensions
         ///     Converts a collection of Product entities to ProductDto objects.
         /// </summary>
         /// <param name="products">The collection of Product entities to convert.</param>
-        /// <param name="productCategories">The collection of ProductCategory entities to use for category information.</param>
         /// <returns>A collection of ProductDto objects.</returns>
-        public static IEnumerable<ProductDto> ConvertToDto(this IEnumerable<Product> products,
-            IEnumerable<ProductCategory> productCategories) => (from product in products
-                                                                join productCategory in productCategories
-                                                                on product.CategoryId equals productCategory.Id
+        public static IEnumerable<ProductDto> ConvertToDto(this IEnumerable<Product> products) => (from product in products
                                                                 select new ProductDto
                                                                 {
                                                                     Id = product.Id,
@@ -29,16 +26,15 @@ namespace Shop.API.Extensions
                                                                     Price = product.Price,
                                                                     Quantity = product.Quantity,
                                                                     CategoryId = product.CategoryId,
-                                                                    CategoryName = productCategory.Name
+                                                                    CategoryName = product.Category.Name
                                                                 }).ToList();
 
         /// <summary>
         ///     Converts a single Product entity to a ProductDto object.
         /// </summary>
         /// <param name="product">The Product entity to convert.</param>
-        /// <param name="productCategory">The ProductCategory entity to use for category information.</param>
         /// <returns>A ProductDto object.</returns>
-        public static ProductDto ConvertToDto(this Product product, ProductCategory productCategory) => new()
+        public static ProductDto ConvertToDto(this Product product) => new()
         {
             Id = product.Id,
             Name = product.Name,
@@ -47,7 +43,7 @@ namespace Shop.API.Extensions
             Price = product.Price,
             Quantity = product.Quantity,
             CategoryId = product.CategoryId,
-            CategoryName = productCategory.Name
+            CategoryName = product.Category.Name
         };
 
         public static Product ConvertToEntity(this ProductDto productDto) => new()
@@ -65,7 +61,6 @@ namespace Shop.API.Extensions
         {
             Name = productDto.Name,
             Description = productDto.Description,
-            ImageURL = productDto.ImageURL,
             Price = productDto.Price,
             Quantity = productDto.Quantity,
             CategoryId = productDto.CategoryId

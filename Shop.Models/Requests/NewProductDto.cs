@@ -8,9 +8,9 @@ namespace Shop.Models.Requests
         public string Name { get; set; }
         [Required(ErrorMessage = "Description is required")]
         public string Description { get; set; }
-        [Url(ErrorMessage = "Invalid URL")]
-        [Required(ErrorMessage = "Image URL is required")]
-        public string ImageURL { get; set; }
+        // // The Image is now a separate entity, so we don't need to include the URL here.
+        // public string ImageURL { get; set; }
+        public ProductImageRequest? Image { get; set; }
         [Required(ErrorMessage = "Price is required")]
         [DataType(DataType.Currency)]
         public decimal Price { get; set; }

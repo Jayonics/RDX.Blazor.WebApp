@@ -10,10 +10,6 @@ namespace Shop.Shared.Extensions
                 // TODO: Upload the PlaceHolder image and return the placeholder URl
                 return url;
             }
-            if (url.StartsWith("http"))
-            {
-                return url;
-            }
 
             if (baseUrl.EndsWith("/"))
             {

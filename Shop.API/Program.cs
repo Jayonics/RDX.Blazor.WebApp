@@ -36,12 +36,18 @@ var connectionString = builder.Configuration.GetConnectionString("DatabaseConnec
 // Add a database context to the services with a connection pool
 builder.Services.AddDbContextPool<ShopDbContext>(options => {
     // Use SQL Server with the selected connection string
-    options.UseSqlServer(connectionString);
+    options
+    .UseSqlServer(connectionString)
+    .EnableDetailedErrors(true)
+    .EnableSensitiveDataLogging(true);
 });
 
 builder.Services.AddDbContextPool<UserDbContext>(options => {
     // Use SQL Server with the selected connection string
-    options.UseSqlServer(connectionString);
+    options
+    .UseSqlServer(connectionString)
+    .EnableDetailedErrors(true)
+    .EnableSensitiveDataLogging(true);
 });
 
 // Add the product repository to the services
@@ -50,15 +56,12 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 // Add the product category repository to the services
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+// Add the MediaRepository to the services
+builder.Services.AddScoped<IMediaRepository, MediaRepository>();
 
 /* For the Azurite Storage Emulator */
 // With connection string
-builder.Services.AddAzureClients(clientBuilder => {
-    clientBuilder.AddBlobServiceClient(builder.Configuration["StorageConnectionString:blob"]!, preferMsi: true);
-    clientBuilder.AddQueueServiceClient(builder.Configuration["StorageConnectionString:queue"]!, preferMsi: true);
-});
-
-builder.Services.AddScoped<IAzureStorageRepository, AzureStorageRepository>();
+builder.Services.AddScoped<IStorageRepository, StorageRepository>();
 
 
 // Activate Identity APIs
@@ -99,6 +102,9 @@ app.MapControllers();
 
 /*// Map Identity Routes
 app.MapIdentityApi<ApplicationUser>();*/
+
+// Save the Swagger JSON file
+app.Services.SaveSwaggerJson();
 
 // Run the application
 app.Run();

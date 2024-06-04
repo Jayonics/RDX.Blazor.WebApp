@@ -5,26 +5,38 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>140d9bd1-bcdb-40ea-89d4-bceaa3331754</UserSecretsId>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Azure.Storage.Blobs" Version="12.13.1" />
-        <PackageReference Include="Azure.Storage.Files.Shares" Version="12.1.0" />
-        <PackageReference Include="Azure.Storage.Queues" Version="12.11.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.5" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.5" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.5" />
+        <PackageReference Include="Azure.Storage.Blobs" Version="12.13.1"/>
+        <PackageReference Include="Azure.Storage.Files.Shares" Version="12.1.0"/>
+        <PackageReference Include="Azure.Storage.Queues" Version="12.11.1"/>
+        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.5"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.5"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.5"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.5">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Azure" Version="1.5.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+        <PackageReference Include="Microsoft.Extensions.Azure" Version="1.5.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Shop.Models\Shop.Models.csproj" />
-        <ProjectReference Include="..\Shop.Shared\Shop.Shared.csproj" />
+        <ProjectReference Include="..\Shop.Models\Shop.Models.csproj"/>
+        <ProjectReference Include="..\Shop.Shared\Shop.Shared.csproj"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Swagger\" />
+    </ItemGroup>
+    
+    <Target Name="CreateSwaggerJson" AfterTargets="Build" Condition="$(Configuration)=='Debug'">
+        <Exec Command="dotnet swagger tofile --output $(ProjectDir)Swagger\swagger.json $(OutputPath)$(AssemblyName).dll v1" WorkingDirectory="$(ProjectDir)"/>
+    </Target>
+
 
 </Project>

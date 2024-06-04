@@ -1,14 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
 
 namespace Shop.Shared.Entities
 {
-    public enum StorageContainers
-    {
-        shop = 0
-    }
-
     /// <summary>
     /// Represents an image associated with a product in the shop.
     /// </summary>
@@ -42,10 +36,5 @@ namespace Shop.Shared.Entities
         /// This can be used for repairing the Name identifier to a file by searching for the hash in the storage container.
         /// </summary>
         public byte[]? ContentMD5 { get; set; }
-
-        /// <summary>
-        /// Gets or sets a reference to the storage container (potentially multiple) if the file is stored in Azure Blob Storage.
-        /// </summary>
-        public IList<StorageContainers> StorageContainers { get; set; }
     }
 }
