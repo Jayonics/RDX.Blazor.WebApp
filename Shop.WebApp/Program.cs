@@ -7,6 +7,7 @@ using Shop.Shared.Data;
 using Shop.Shared.Entities;
 using Shop.WebApp.Services;
 using Shop.WebApp.Services.Contracts;
+using Serilog;
 
 namespace Shop.WebApp
 {
@@ -14,6 +15,14 @@ namespace Shop.WebApp
     {
         public static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.Console()
+            .WriteTo.File("Logs/auditlog.txt", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
+            Log.Information("Starting up");
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add the BlazorBoostrap Service to the container (NuGet package).
@@ -38,6 +47,9 @@ namespace Shop.WebApp
             .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
             .AddJsonFile($"appsettings.{computerName}.json", optional: true)
             .AddEnvironmentVariables();
+
+            // Logging
+            builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 
             // Select the connection string based on the machine name
             var connectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
@@ -73,6 +85,17 @@ namespace Shop.WebApp
             builder.Services.AddAuthorization(options => {
                 options.AddPolicy("AdminOrStaff", configurePolicy: policy => policy.RequireRole("Admin", "Staff"));
             });
+
+            // Configure Serilog
+            builder.Logging.ClearProviders();
+            builder.Host.UseSerilog((context, configuration) => {
+                configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .WriteTo.File("Logs/auditlog.txt", rollingInterval: RollingInterval.Day);
+            });
+            builder.Logging.AddSerilog();
 
 
             var app = builder.Build();
