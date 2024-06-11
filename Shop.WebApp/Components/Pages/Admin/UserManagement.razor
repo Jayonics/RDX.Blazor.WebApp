@@ -21,14 +21,14 @@
         if (claimsPrincipal.Identity != null && claimsPrincipal.Identity.IsAuthenticated)
         {
             // If the client is authenticated, log the user's email, page, and action
-            Logger.LogInformation($"Priveleged User {claimsPrincipal.Identity.Name} accessed the User Management page.");
-            // Log.Logger.Information("{ClassName} - {MethodName} page accessed by {User}", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name);
+            // Logger.LogInformation($"Priveleged User {claimsPrincipal.Identity.Name} accessed the User Management page.");
+            Log.Logger.Information("{ClassName} - {MethodName} page accessed by {User}", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name);
         }
         else
         {
             // If the client is not authenticated, log a warning
-            Logger.LogWarning("An unauthenticated user accessed the User Management page.");
-            // Log.Logger.Warning("{ClassName} - {MethodName} an unauthenticated user attempted to access the page and was denied access", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name);
+            // Logger.LogWarning("An unauthenticated user accessed the User Management page.");
+            Log.Logger.Warning("{ClassName} - {MethodName} an unauthenticated user attempted to access the page and was denied access", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name);
             NavigationManager.NavigateTo("/Identity/Account/Login");
         }
 

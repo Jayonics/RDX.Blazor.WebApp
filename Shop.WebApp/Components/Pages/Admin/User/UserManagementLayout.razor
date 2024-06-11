@@ -53,17 +53,17 @@ else
         if (claimsPrincipal.Identity != null && claimsPrincipal.Identity.IsAuthenticated)
         {
             // If the client is authenticated, log the user's email, page, and action
-            Logger.LogInformation($"Privileged user {claimsPrincipal.Identity.Name} accessed the User Management page for user {user.UserName}.");
+            // Logger.LogInformation($"Privileged user {claimsPrincipal.Identity.Name} accessed the User Management page for user {user.UserName}.");
             // Log.Logger.WithClassAndMethodNames<UserManagementLayout>().Information("{ClassName} - {MethodName} page accessed by {User} for user {UserName}", typeof().Name claimsPrincipal.Identity.Name, user.UserName);
-            // Log.Logger.Information("{ClassName} - {MethodName} page accessed by {Admin} on behalf of user {User}", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name, user.UserName);
+            Log.Logger.Information("{ClassName} - {MethodName} page accessed by {Admin} on behalf of user {User}", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name, user.UserName);
 
         }
         else
         {
             // If the client is not authenticated, log a warning
-            Logger.LogWarning("An unauthenticated user accessed the User Management page.");
+            // Logger.LogWarning("An unauthenticated user accessed the User Management page.");
             // Log.Logger.WithClassAndMethodNames<UserManagementLayout>().Warning("An unauthenticated user accessed the User Management page");
-            // Log.Logger.Warning("{ClassName} - {MethodName} an unauthenticated user attempted to access the page but failed", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name, user.UserName);
+            Log.Logger.Warning("{ClassName} - {MethodName} an unauthenticated user attempted to access the page but failed", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name, user.UserName);
             NavigationManager.NavigateTo("/Identity/Account/Login");
         }
 
