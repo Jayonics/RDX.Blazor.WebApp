@@ -22,6 +22,8 @@ namespace Shop.WebApp
             // Add services to the container.
             builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
+            // .AddInteractiveWebAssemblyComponents();
+
 
             builder.Services.AddCascadingAuthenticationState();
             builder.Services.AddScoped<IdentityUserAccessor>();
@@ -95,6 +97,7 @@ namespace Shop.WebApp
 
             app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
+            // .AddInteractiveWebAssemblyRenderMode();
 
             // Add additional endpoints required by the Identity /Account Razor components.
             app.MapAdditionalIdentityEndpoints();
