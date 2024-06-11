@@ -1,0 +1,17 @@
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Shop.WebApp.Components.Pages.Admin.Shared
+@using System.Security.Claims
+@using Shop.Shared.Entities
+@using System.Text.Json
+@using Serilog
+@using Shop.WebApp.Extensions
+@using System.Reflection
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<ApplicationRole> RoleManager
+
+@attribute [Authorize]

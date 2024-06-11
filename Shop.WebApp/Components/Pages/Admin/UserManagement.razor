@@ -1,0 +1,42 @@
+@page "/UserManagement"
+
+@inject ILogger<UserManagement> Logger
+
+<h3>User Management</h3>
+<hr/>
+
+<button class="btn btn-primary" @onclick="CreateNewUser">Create a new user</button>
+
+<div>
+    <UserList />
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var claimsPrincipal = authState.User;
+
+        // If the client attempting to access the UserManagement is not authenticated, log a warning
+        if (claimsPrincipal.Identity != null && claimsPrincipal.Identity.IsAuthenticated)
+        {
+            // If the client is authenticated, log the user's email, page, and action
+            Logger.LogInformation($"Priveleged User {claimsPrincipal.Identity.Name} accessed the User Management page.");
+            // Log.Logger.Information("{ClassName} - {MethodName} page accessed by {User}", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name);
+        }
+        else
+        {
+            // If the client is not authenticated, log a warning
+            Logger.LogWarning("An unauthenticated user accessed the User Management page.");
+            // Log.Logger.Warning("{ClassName} - {MethodName} an unauthenticated user attempted to access the page and was denied access", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name);
+            NavigationManager.NavigateTo("/Identity/Account/Login");
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private void CreateNewUser()
+    {
+        NavigationManager.NavigateTo("/UserManagement/Register");
+    }
+}

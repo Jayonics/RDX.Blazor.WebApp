@@ -1,0 +1,85 @@
+@if (users == null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th>2FA</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>
+                        @foreach (var role in user.UserRoles.Select(ur => ur.Role.Name))
+                        {
+                            <span class="badge rounded fs-6 mx-1 bg-@GetRoleClass(role!)">@role</span>
+                        }
+                    </td>
+                    <td>
+                        @if (user.TwoFactorEnabled)
+                        {
+                            <span class="badge rounded fs-6 bg-success">Enabled</span>
+                        }
+                        else
+                        {
+                            <span class="badge rounded fs-6 bg-danger">Disabled</span>
+                        }
+                    </td>
+                    <td>
+                        <CascadingValue Value="@user.Id">
+                            <button class="btn btn-primary me-2" @onclick="() => NavigateToUserAdmin(user.Id)">Edit</button>
+                        </CascadingValue>
+                        <button class="btn btn-danger" onclick="@(() => NavigateToUserAdmin(user.Id, "Delete"))">Delete</button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<ApplicationUser> users;
+
+    private void NavigateToUserAdmin(string userId, string action = "Profile")
+    {
+        NavigationManager.NavigateTo($"/UserManagement/{userId}/{action}");
+    }
+
+    private string GetRoleClass(string roleName)
+    {
+        return roleName switch
+        {
+            "Admin" => "danger",
+            "Staff" => "warning",
+            "Customer" => "primary",
+            _ => "secondary"
+        };
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        users = await UserManager.Users
+        .Include(u => u.UserRoles)
+        .ThenInclude(ur => ur.Role)
+        .ToListAsync();
+
+        await base.OnParametersSetAsync();
+    }
+}
