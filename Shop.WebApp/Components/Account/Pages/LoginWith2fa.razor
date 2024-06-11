@@ -53,10 +53,10 @@
     private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; }
+    private string? ReturnUrl { get; set; }
 
     [SupplyParameterFromQuery]
-    private bool RememberMe { get; }
+    private bool RememberMe { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
