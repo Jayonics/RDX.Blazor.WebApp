@@ -1,0 +1,72 @@
+@using Shop.WebApp.Components.Layout
+@inherits LayoutComponentBase
+@layout MainLayout
+@inject ILogger<UserManagementLayout> Logger
+
+@if (user == null)
+{
+    <div class="container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <h2>Modify Account</h2>
+    <h3 class="mb-3"><span class="badge bg-secondary">@user.UserName</span></h3>
+    <hr/>
+    <div class="row">
+        <!-- Your layout here -->
+        <div class="col-md-3">
+            <UserManagementNavMenu userId="@userId"/>
+        </div>
+        <div class="col-md-9">
+            @Body
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public string? userId { get; set; }
+
+    private ApplicationUser user = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if ((this.Body.Target as RouteView)?.RouteData?.RouteValues.TryGetValue("userId", out var rootUserId) == true)
+        {
+            this.userId = rootUserId?.ToString();
+        }
+
+        if (userId != null)
+        {
+            user = await UserManager.FindByIdAsync(userId);
+        }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var claimsPrincipal = authState.User;
+
+        // If the client attempting to access the UserManagement is not authenticated, log a warning
+        if (claimsPrincipal.Identity != null && claimsPrincipal.Identity.IsAuthenticated)
+        {
+            // If the client is authenticated, log the user's email, page, and action
+            Logger.LogInformation($"Privileged user {claimsPrincipal.Identity.Name} accessed the User Management page for user {user.UserName}.");
+            // Log.Logger.WithClassAndMethodNames<UserManagementLayout>().Information("{ClassName} - {MethodName} page accessed by {User} for user {UserName}", typeof().Name claimsPrincipal.Identity.Name, user.UserName);
+            // Log.Logger.Information("{ClassName} - {MethodName} page accessed by {Admin} on behalf of user {User}", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name, user.UserName);
+
+        }
+        else
+        {
+            // If the client is not authenticated, log a warning
+            Logger.LogWarning("An unauthenticated user accessed the User Management page.");
+            // Log.Logger.WithClassAndMethodNames<UserManagementLayout>().Warning("An unauthenticated user accessed the User Management page");
+            // Log.Logger.Warning("{ClassName} - {MethodName} an unauthenticated user attempted to access the page but failed", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name, user.UserName);
+            NavigationManager.NavigateTo("/Identity/Account/Login");
+        }
+
+        await base.OnParametersSetAsync();
+    }
+}

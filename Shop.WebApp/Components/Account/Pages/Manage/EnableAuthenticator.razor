@@ -83,7 +83,7 @@ else
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; } = new();
+    private InputModel Input { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {

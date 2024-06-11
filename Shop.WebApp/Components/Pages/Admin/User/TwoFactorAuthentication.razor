@@ -1,0 +1,111 @@
+﻿@page "/UserManagement/{userId}/TwoFactorAuthentication"
+
+@inject ILogger<TwoFactorAuthentication> Logger
+
+<PageTitle>Two-factor authentication (2FA)</PageTitle>
+
+<StatusMessage Message="@message"/>
+<h3>Two-factor authentication (2FA)</h3>
+@if (user != null)
+{
+    @if (is2faEnabled)
+    {
+        <div class="alert alert-success">
+            <strong>2FA is enabled for this user.</strong>
+        </div>
+        <button type="button" class="btn btn-warning" @onclick="Disable2fa">Disable 2FA</button>
+        <button type="button" class="btn btn-danger" @onclick="Delete2fa">Delete 2FA</button>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            <strong>2FA is not enabled for this user.</strong>
+        </div>
+        <button type="button" class="btn btn-primary" @onclick="Enable2fa">Enable 2FA</button>
+    }
+}
+else
+{
+    <div class="container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string userId { get; set; }
+
+    private ApplicationUser user = default!;
+
+    private string? message;
+
+    private bool is2faEnabled;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Logger.LogInformation("Initializing TwoFactorAuthentication page for user with ID '{UserId}'", userId);
+        user = await UserManager.FindByIdAsync(userId: userId);
+        if (user == null)
+        {
+            message = "Error: User not found";
+            Logger.LogError("User with ID '{UserId}' not found", userId);
+        }
+        is2faEnabled = await UserManager.GetTwoFactorEnabledAsync(user);
+        Logger.LogInformation("2FA status for user with ID '{UserId}' is {Is2faEnabled}", userId, is2faEnabled);
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task Disable2fa()
+    {
+        Logger.LogInformation("Disabling 2FA for user with ID '{UserId}'", userId);
+        var disable2faResult = await UserManager.SetTwoFactorEnabledAsync(user, false);
+        if (!disable2faResult.Succeeded)
+        {
+            message = $"Error: Could not disable 2FA for the user {user.UserName}.";
+            Logger.LogError("Could not disable 2FA for user with ID '{UserId}'", userId);
+            return;
+        }
+
+        message = "2FA has been disabled";
+        is2faEnabled = false;
+        Logger.LogInformation("2FA has been disabled for user with ID '{UserId}'", userId);
+    }
+
+    private async Task Delete2fa()
+    {
+        Logger.LogInformation("Deleting 2FA for user with ID '{UserId}'", userId);
+        // Disable 2FA
+        await UserManager.SetTwoFactorEnabledAsync(user, false);
+        // Reset the authenticator key
+        var resetAuthenticatorResult = await UserManager.ResetAuthenticatorKeyAsync(user);
+        if (!resetAuthenticatorResult.Succeeded)
+        {
+            message = $"Error: Could not reset the authenticator key for the user {user.UserName}.";
+            Logger.LogError("Could not reset the authenticator key for user with ID '{UserId}'", userId);
+            return;
+        }
+
+        message = "2FA authenticator key has been reset";
+        is2faEnabled = await UserManager.GetTwoFactorEnabledAsync(user);
+        Logger.LogInformation("2FA authenticator key has been reset for user with ID '{UserId}'", userId);
+    }
+
+    private async Task Enable2fa()
+    {
+        Logger.LogInformation("Enabling 2FA for user with ID '{UserId}'", userId);
+        var enable2faResult = await UserManager.SetTwoFactorEnabledAsync(user, true);
+        if (!enable2faResult.Succeeded)
+        {
+            message = $"Error: Could not enable 2FA for the user {user.UserName}.";
+            Logger.LogError("Could not enable 2FA for user with ID '{UserId}'", userId);
+            return;
+        }
+
+        message = "2FA has been enabled";
+        is2faEnabled = true;
+        Logger.LogInformation("2FA has been enabled for user with ID '{UserId}'", userId);
+    }
+}

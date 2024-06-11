@@ -84,7 +84,7 @@
     private string? ProviderKey { get; set; }
 
     [SupplyParameterFromQuery]
-    private string? Action { get; }
+    private string? Action { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

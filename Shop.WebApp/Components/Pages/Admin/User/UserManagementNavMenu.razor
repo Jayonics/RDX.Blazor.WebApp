@@ -1,0 +1,34 @@
+@if (userId == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <ul class="nav nav-pills flex-column">
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@($"{_pathPrefix}/{userId}/Profile")" Match="NavLinkMatch.All">Profile</NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@($"{_pathPrefix}/{userId}/Email")" Match="NavLinkMatch.All">Email</NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@($"{_pathPrefix}/{userId}/Password")" Match="NavLinkMatch.All">Password</NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@($"{_pathPrefix}/{userId}/TwoFactorAuthentication")" Match="NavLinkMatch.All">Two-factor authentication</NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@($"{_pathPrefix}/{userId}/Roles")" Match="NavLinkMatch.All">Roles</NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="@($"{_pathPrefix}/{userId}/Delete")" Match="NavLinkMatch.All">Delete Account</NavLink>
+        </li>
+    </ul>
+}
+
+@code {
+    [Parameter]
+    public string? userId { get; set; }
+
+    static string _pathPrefix = "UserManagement";
+}

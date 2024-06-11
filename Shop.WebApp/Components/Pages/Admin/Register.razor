@@ -1,29 +1,19 @@
-﻿@page "/Account/Register"
+﻿@page "/UserManagement/Register"
 @using System.ComponentModel.DataAnnotations
-@using System.Text
-@using System.Text.Encodings.Web
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
-@using Shop.Shared.Entities
 
-@inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
-@inject SignInManager<ApplicationUser> SignInManager
-@inject IEmailSender<ApplicationUser> EmailSender
 @inject ILogger<Register> Logger
-@inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Register</PageTitle>
+<PageTitle>Create an account</PageTitle>
 
-<h1>Register</h1>
+<h1>Create</h1>
 
 <div class="row">
     <div class="col-md-4">
         <StatusMessage Message="@Message"/>
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+        <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator/>
-            <h2>Create a new account.</h2>
+            <h2>Create an account.</h2>
             <hr/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
@@ -44,13 +34,6 @@
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
     </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr/>
-            <ExternalLoginPicker/>
-        </section>
-    </div>
 </div>
 
 @code {
@@ -59,9 +42,6 @@
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
-
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
@@ -80,27 +60,22 @@
             return;
         }
 
-        Logger.LogInformation("User created a new account with password.");
+        // Generate an email confirmation token
+        var token = await UserManager.GenerateEmailConfirmationTokenAsync(user);
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-        NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-        new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
+        // Confirm the user's email
+        var confirmEmailResult = await UserManager.ConfirmEmailAsync(user, token);
+        if (!confirmEmailResult.Succeeded)
         {
-            RedirectManager.RedirectTo(
-            "Account/RegisterConfirmation",
-            new Dictionary<string, object?>
-            { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            // Log the error or throw an exception
+            Logger.LogError("Error confirming email for user {UserId}", user.Id);
+            return;
         }
 
-        await SignInManager.SignInAsync(user, false);
-        RedirectManager.RedirectTo(ReturnUrl);
+        Logger.LogInformation("User created a new account with password.");
+
+        // Redirect to the user's profile page
+        NavigationManager.NavigateTo($"/UserManagement/{user.Id}/Profile");
     }
 
     private ApplicationUser CreateUser()
