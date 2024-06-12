@@ -124,6 +124,9 @@
 
     private string? Message { get; set; }
 
+    [CascadingParameter]
+    private AuthenticationState? AuthenticationState { get; set; }
+
     public async void AddNewProduct()
     {
         product.CategoryId = (product.CategoryId == 0) ? productCategories.First().Id : product.CategoryId;
