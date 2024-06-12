@@ -1,6 +1,7 @@
 @page "/product/{Id}"
 @using Microsoft.AspNetCore.Authorization
 @using Shop.Models.Requests
+@using Shop.WebApp.Extensions
 @using Shop.WebApp.Services.Contracts
 @rendermode InteractiveServer
 @inject IProductService ProductService
@@ -172,7 +173,6 @@ else
 
     private string? Message { get; set; }
 
-
     [CascadingParameter]
     private AuthenticationState? AuthenticationState { get; set; }
 
@@ -249,13 +249,7 @@ else
         }
 
         // Log all properties of the product object
-        Logger.LogInformation("Product submitted: {product}", product);
-
-        // Debug Log each property of the product object
-        foreach (var property in product.GetType().GetProperties())
-        {
-            Logger.LogDebug("{property}: {value}", property.Name, property.GetValue(product));
-        }
+        Log.Logger.WithClassAndMethodNames<Product>().Debug("Product to update: {@product}", product);
 
         // Call the service to update the product
         try
@@ -267,6 +261,7 @@ else
                 Message = "Product updated successfully";
                 ImageURL = result.ImageURL;
                 product = result;// Update the product with the returned result
+                Log.Logger.WithClassAndMethodNames<Product>().Information($"{AuthenticationState.User.Identity.Name} UPDATED product {@product.Name} SUCCESSFULLY");
             }
             else
             {
@@ -276,7 +271,7 @@ else
         catch (Exception ex)
         {
             // Log the exception and set the message
-            Logger.LogError(ex, $"Product update failed: {ex.Message}");
+            Log.Logger.WithClassAndMethodNames<Product>().Error(ex, $"User {AuthenticationState.User.Identity.Name} FAILED to UPDATE Product {@product.Name}");
             Message = $"Product update failed: {ex.Message}";
         }
 
@@ -311,20 +306,15 @@ else
                     product.ImageURL = result.Blob.Uri;
 
                     Message = "Image uploaded successfully";
-                    Logger.LogInformation("Image uploaded successfully");
-                    Logger.LogDebug("Image URL: {imageURL}", product.ImageURL);
+                    Log.Logger.WithClassAndMethodNames<Product>().Information($"User {AuthenticationState.User.Identity.Name} UPDATED Image {product.ImageURL} FOR Product {@product.Name} SUCCESSFULLY");
+
                     await InvokeAsync(() => StateHasChanged());
-                }
-                else
-                {
-                    Message = "Failed to upload image";
-                    Logger.LogError("Failed to upload image");
                 }
             }
             catch (Exception ex)
             {
                 Message = "Failed to upload image";
-                Logger.LogError(ex, "Failed to upload image");
+                Log.Logger.WithClassAndMethodNames<Product>().Error(ex, $"User {AuthenticationState.User.Identity.Name} FAILED to UPDATE Image FOR Product {@product.Name}");
             }
         }
     }
@@ -342,6 +332,7 @@ else
         var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
         if (!authorizationResult.Succeeded)
         {
+            Log.Logger.WithClassAndMethodNames<Product>().Warning("User is not authorized to edit products.");
             EditMode = false;
         }
 
@@ -360,7 +351,7 @@ else
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Unable to fetch product details");
+                Log.Logger.WithClassAndMethodNames<Product>().Error(ex, "Failed to load product details for editing.");
                 // Redirect to the /products page
                 NavigationManager.NavigateTo("/products");
             }

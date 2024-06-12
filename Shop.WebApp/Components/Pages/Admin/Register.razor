@@ -56,6 +56,7 @@
 
         if (!result.Succeeded)
         {
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to create user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, user.UserName);
             identityErrors = result.Errors;
             return;
         }
@@ -68,11 +69,11 @@
         if (!confirmEmailResult.Succeeded)
         {
             // Log the error or throw an exception
-            Logger.LogError("Error confirming email for user {UserId}", user.Id);
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to confirm email for user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, user.UserName);
             return;
         }
 
-        Logger.LogInformation("User created a new account with password.");
+        Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY created user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, user.UserName);
 
         // Redirect to the user's profile page
         NavigationManager.NavigateTo($"/UserManagement/{user.Id}/Profile");

@@ -1,5 +1,7 @@
 @page "/addproduct"
+@using Microsoft.AspNetCore.Authorization
 @using Shop.Models.Requests
+@using Shop.WebApp.Extensions
 @using Shop.WebApp.Services
 @using Shop.WebApp.Services.Contracts
 @rendermode InteractiveServer
@@ -8,6 +10,7 @@
 @inject ILogger<Product> Logger
 @inject NavigationManager NavigationManager
 @inject IStorageService StorageService
+@inject IAuthorizationService AuthorizationService
 
 
 <div class="container-fluid">
@@ -132,10 +135,12 @@
             ImageURL = result.ImageURL;
             // Navigate to the /product/{id} page
             NavigationManager.NavigateTo($"/product/{result.Id}");
+            Log.Logger.WithClassAndMethodNames<AddProduct>().Information($"User {AuthenticationState.User.Identity.Name} ADDED Product [{product.Name}] added SUCCESSFULLY [ID: {result.Id}]");
         }
         else
         {
             Message = "Product add failed";
+            Log.Logger.WithClassAndMethodNames<AddProduct>().Error($" User {AuthenticationState.User.Identity.Name} FAILED to add Product");
         }
     }
 
@@ -164,16 +169,12 @@
                     };
                     ImageURL = result.Blob.Uri;
 
-                    Logger.LogInformation("Image uploaded successfully");
-                }
-                else
-                {
-                    Logger.LogError("Failed to upload image");
+                    Log.Logger.WithClassAndMethodNames<AddProduct>().Information("Image uploaded successfully");
                 }
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Failed to upload image");
+                Log.Logger.WithClassAndMethodNames<AddProduct>().Error(ex, "Failed to upload image");
             }
         }
     }
@@ -186,8 +187,20 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // Pre-authorize the user before deleting the product
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
+        if (!authorizationResult.Succeeded)
+        {
+            // The user is not authorized to delete products
+            Message = "You are not authorized to delete products.";
+            Logger.LogWarning("User is not authorized to delete products.");
+            // Log Details of the user
+            Logger.LogDebug("User Details: {user}", AuthenticationState.User);
+            return;
+        }
         product = new NewProductDto();
         productCategories = await GetProductCategories();
+        await base.OnInitializedAsync();
     }
 
     protected override async Task OnParametersSetAsync()
@@ -199,7 +212,7 @@
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Unable to fetch product details");
+                Log.Logger.WithClassAndMethodNames<Product>().Error(ex, "Failed to get product categories");
                 // Redirect to the /products page
                 NavigationManager.NavigateTo("/products");
             }

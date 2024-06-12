@@ -60,18 +60,19 @@ else
 
     private async Task Disable2fa()
     {
-        Logger.LogInformation("Disabling 2FA for user with ID '{UserId}'", userId);
+        Log.Logger.Information("{ClassName}: {Admin} Disabling 2FA for user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, user.UserName);
         var disable2faResult = await UserManager.SetTwoFactorEnabledAsync(user, false);
         if (!disable2faResult.Succeeded)
         {
             message = $"Error: Could not disable 2FA for the user {user.UserName}.";
-            Logger.LogError("Could not disable 2FA for user with ID '{UserId}'", userId);
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to execute {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
+            Log.Logger.Error("{ClassName}: {Admin} Error: {@Error}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, disable2faResult.Errors);
             return;
         }
 
-        message = "2FA has been disabled";
         is2faEnabled = false;
-        Logger.LogInformation("2FA has been disabled for user with ID '{UserId}'", userId);
+        message = "2FA has been disabled";
+        Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY executed {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
     }
 
     private async Task Delete2fa()
@@ -84,28 +85,30 @@ else
         if (!resetAuthenticatorResult.Succeeded)
         {
             message = $"Error: Could not reset the authenticator key for the user {user.UserName}.";
-            Logger.LogError("Could not reset the authenticator key for user with ID '{UserId}'", userId);
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to execute {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
+            Log.Logger.Error("{ClassName}: {Admin} Error: {@Error}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, resetAuthenticatorResult.Errors);
             return;
         }
 
         message = "2FA authenticator key has been reset";
         is2faEnabled = await UserManager.GetTwoFactorEnabledAsync(user);
-        Logger.LogInformation("2FA authenticator key has been reset for user with ID '{UserId}'", userId);
+        Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY executed {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
     }
 
     private async Task Enable2fa()
     {
-        Logger.LogInformation("Enabling 2FA for user with ID '{UserId}'", userId);
+        Log.Logger.Information("{ClassName}: {Admin} Enabling 2FA for user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, user.UserName);
         var enable2faResult = await UserManager.SetTwoFactorEnabledAsync(user, true);
         if (!enable2faResult.Succeeded)
         {
             message = $"Error: Could not enable 2FA for the user {user.UserName}.";
-            Logger.LogError("Could not enable 2FA for user with ID '{UserId}'", userId);
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to execute {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
+            Log.Logger.Error("{ClassName}: {Admin} Error: {@Error}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, enable2faResult.Errors);
             return;
         }
 
         message = "2FA has been enabled";
         is2faEnabled = true;
-        Logger.LogInformation("2FA has been enabled for user with ID '{UserId}'", userId);
+        Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY executed {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
     }
 }

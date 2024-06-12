@@ -1,16 +1,34 @@
 using System.Runtime.CompilerServices;
-using ILogger = Serilog.ILogger;
+using Microsoft.AspNetCore.Authorization;
+using Shop.Shared.Entities;
+using ILogger=Serilog.ILogger;
 
 namespace Shop.WebApp.Extensions
 {
     public static class LoggerExtensions
     {
-        public static ILogger WithClassAndMethodNames<T>(this ILogger logger,
-            [CallerMemberName] string memberName = "")
+        public static ILogger WithClassAndMethodNames<T>(
+            this ILogger logger,
+            [CallerMemberName] string memberName = ""
+        )
         {
             var className = typeof(T).Name;
-            return logger.ForContext("ClassName", className)
-                .ForContext("MethodName", memberName);
+            return logger
+            .ForContext("ClassName", className)
+            .ForContext("MethodName", memberName);
+        }
+        
+        public static ILogger WithClassMethodAndUser<T>(
+            this ILogger logger,
+            [CallerMemberName] string memberName = "",
+            ApplicationUser user = null
+        )
+        {
+            var className = typeof(T).Name;
+            return logger
+            .ForContext("ClassName", className)
+            .ForContext("MethodName", memberName)
+            .ForContext("User", "User");
         }
     }
 }

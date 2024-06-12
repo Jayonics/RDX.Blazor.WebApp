@@ -58,10 +58,11 @@
         var result = await UserManager.DeleteAsync(user);
         if (!result.Succeeded)
         {
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to execute {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
             throw new InvalidOperationException("Unexpected error occurred deleting user.");
         }
 
-        Logger.LogInformation("User with ID '{UserId}' has been deleted.", userId);
+        Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY executed {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
         message = $"User account {user.Email} has been deleted. Redirecting to User Management page...";
 
         // Wait for 3 seconds
