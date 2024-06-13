@@ -17,18 +17,5 @@ namespace Shop.WebApp.Extensions
             .ForContext("ClassName", className)
             .ForContext("MethodName", memberName);
         }
-        
-        public static ILogger WithClassMethodAndUser<T>(
-            this ILogger logger,
-            [CallerMemberName] string memberName = "",
-            ApplicationUser user = null
-        )
-        {
-            var className = typeof(T).Name;
-            return logger
-            .ForContext("ClassName", className)
-            .ForContext("MethodName", memberName)
-            .ForContext("User", "User");
-        }
     }
 }
