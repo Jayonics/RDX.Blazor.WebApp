@@ -1,16 +1,12 @@
-@page "/addproduct"
-@using Microsoft.AspNetCore.Authorization
+@page "/product/add"
 @using Shop.Models.Requests
 @using Shop.WebApp.Extensions
-@using Shop.WebApp.Services
 @using Shop.WebApp.Services.Contracts
 @rendermode InteractiveServer
 @inject IProductService ProductService
 @inject IProductCategoryService ProductCategoryService
 @inject ILogger<Product> Logger
-@inject NavigationManager NavigationManager
 @inject IStorageService StorageService
-@inject IAuthorizationService AuthorizationService
 
 
 <div class="container-fluid">
@@ -190,6 +186,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
         // Pre-authorize the user before deleting the product
         var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
         if (!authorizationResult.Succeeded)

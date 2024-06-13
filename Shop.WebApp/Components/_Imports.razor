@@ -11,4 +11,9 @@
 @using Shop.WebApp.Components
 @using Shop.Models.Dtos
 @using BlazorBootstrap;
+@using Microsoft.AspNetCore.Authorization
 @using Serilog
+
+@inject NavigationManager NavigationManager
+@inject IAuthorizationService AuthorizationService
+@inject AuthenticationStateProvider AuthenticationStateProvider
