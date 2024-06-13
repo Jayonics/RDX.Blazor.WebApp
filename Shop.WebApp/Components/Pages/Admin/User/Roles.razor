@@ -69,9 +69,18 @@ else
         var rolesToRemove = userRoles.Except(UserRoleForm.Roles.Where(r => r.IsSelected).Select(r => r.Role.Name));
         var rolesToAdd = UserRoleForm.Roles.Where(r => r.IsSelected).Select(r => r.Role.Name).Except(userRoles);
 
-        await UserManager.AddToRolesAsync(user, rolesToAdd!);
-        await UserManager.RemoveFromRolesAsync(user, rolesToRemove!);
+        var addResult = await UserManager.AddToRolesAsync(user, rolesToAdd!);
+        var removeResult = await UserManager.RemoveFromRolesAsync(user, rolesToRemove!);
 
+        if (!addResult.Succeeded || !removeResult.Succeeded)
+        {
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to execute {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
+            Log.Logger.Error("Error: {@Error}", string.Join(",", addResult.Errors.Concat(removeResult.Errors).Select(error => error.Description)));
+            message = $"Error: {string.Join(",", addResult.Errors.Concat(removeResult.Errors).Select(error => error.Description))}";
+            return;
+        }
+
+        Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY executed {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
         message = "Roles updated successfully.";
     }
 

@@ -92,10 +92,12 @@ else
             var result = await UserManager.SetEmailAsync(user, Input.NewEmail);
             if (!result.Succeeded)
             {
+                Log.Logger.Error("{ClassName}: {Admin} FAILED to execute {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
                 message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
             }
             else
             {
+                Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY executed {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
                 message = "Email changed successfully.";
             }
         } catch (Exception ex)

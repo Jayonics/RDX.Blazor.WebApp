@@ -12,6 +12,7 @@
     <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
     <method v="2">
       <option name="Build" />
+      <option name="RunAzuriteTask" enabled="true" />
     </method>
   </configuration>
 </component>

@@ -1,4 +1,6 @@
-﻿using Shop.Models.Dtos;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using Serilog;
+using Shop.Models.Dtos;
 using Shop.Models.Requests;
 using Shop.WebApp.Services.Contracts;
 
@@ -30,15 +32,11 @@ namespace Shop.WebApp.Services
         {
             try
             {
-                _logger.LogDebug("UpdateProduct: {product}", product);
-
                 var response = await _httpClient.PutAsJsonAsync($"api/Product/{product.Id}", product);
                 if (response.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation($"Product updated successfully {response.StatusCode}");
                     return await response.Content.ReadFromJsonAsync<ProductDto>();
                 }
-                _logger.LogWarning($"Product update failed with status code {response.StatusCode}");
                 // You can throw an exception or return null based on your error handling strategy
                 throw new Exception($"Product update failed with status code {response.StatusCode}");
             }
