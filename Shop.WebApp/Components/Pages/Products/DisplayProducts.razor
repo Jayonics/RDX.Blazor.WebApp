@@ -1,4 +1,6 @@
-﻿<style>
+﻿@rendermode InteractiveServer
+
+<style>
     a {
         text-decoration: none;
     }
@@ -53,10 +55,6 @@
 }
 
 @code {
-
-    [Inject]
-    NavigationManager NavigationManager { get; set; }
-
     [Parameter]
     public IEnumerable<ProductDto> Products { get; set; }
 

@@ -58,11 +58,11 @@ namespace Shop.API.Controllers
                 return Ok(productDtos);
             }
             // If any exception occurs during the execution of the try block
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Return a 500 Internal Server Error status with a custom error message
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                "Error retrieving data from the database");
+                ex.Message);
             }
         }
 
