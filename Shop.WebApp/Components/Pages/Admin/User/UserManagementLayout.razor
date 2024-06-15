@@ -1,0 +1,68 @@
+@using Shop.WebApp.Components.Layout
+@inherits LayoutComponentBase
+@layout MainLayout
+@inject ILogger<UserManagementLayout> Logger
+
+@if (user == null)
+{
+    <div class="container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <h2>Modify Account</h2>
+    <h3 class="mb-3">
+        <span class="badge bg-secondary">@user.UserName</span>
+    </h3>
+    <hr/>
+    <div class="row">
+        <!-- Your layout here -->
+        <div class="col-md-3">
+            <UserManagementNavMenu userId="@userId"/>
+        </div>
+        <div class="col-md-9">
+            @Body
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public string? userId { get; set; }
+
+    private ApplicationUser user = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if ((this.Body.Target as RouteView)?.RouteData?.RouteValues.TryGetValue("userId", out var rootUserId) == true)
+        {
+            this.userId = rootUserId?.ToString();
+        }
+
+        if (userId != null)
+        {
+            user = await UserManager.FindByIdAsync(userId);
+        }
+
+        if (!AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User.Identity.IsAuthenticated)
+        {
+            Log.Logger.Warning("{ClassName}: {Admin} an unauthenticated user attempted to access the page and was denied access", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name);
+            NavigationManager.NavigateTo("/Identity/Account/Login");
+        }
+        else
+        {
+            Log.Logger.Information("{ClassName}: {Admin} accessed the {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
+        }
+
+        await base.OnParametersSetAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+}

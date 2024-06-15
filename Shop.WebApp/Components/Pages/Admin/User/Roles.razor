@@ -1,0 +1,119 @@
+@page "/UserManagement/{userId}/Roles"
+
+@inject ILogger<Roles> Logger
+
+
+<h3>User Roles</h3>
+<StatusMessage Message="@message"></StatusMessage>
+@if (UserRoleForm != null)
+{
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="UserRoleForm" FormName="change-roles" OnValidSubmit="OnValidSubmitAsync" method="post" class="card p-3">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="alert alert-danger"/>
+                @foreach (var role in UserRoleForm.Roles)
+                {
+                    <div class="border border-@GetRoleClass(role.Role.Name) p-1 m-1 rounded fs-5 bg-@GetRoleClass(role.Role.Name)-subtle">
+                        <div class="form-switch">
+                            <InputCheckbox class="form-check-input" @bind-Value="role.IsSelected" id="@role.Role.Name"/>
+                            <label class="form-check-label" for="@role.Role.Name">@role.Role.Name</label>
+                        </div>
+                    </div>
+                }
+                <button type="submit" class="btn btn-primary mt-3">Update Roles</button>
+            </EditForm>
+        </div>
+    </div>
+}
+else
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public string userId { get; set; }
+
+    private string? message;
+
+    private ApplicationUser user = default!;
+
+    private List<ApplicationRole> roles;
+
+    [SupplyParameterFromForm(FormName = "change-roles")]
+    private UserRoleFormModel UserRoleForm { get; set; }
+
+    public class UserRoleFormModel
+    {
+        [Comment("The roles to assign to the user.")]
+        public List<UserRoleFormElement> Roles { get; set; }
+    }
+
+    public class UserRoleFormElement
+    {
+        [Required]
+        public ApplicationRole Role { get; set; }
+
+        [Display(Name = "Is Selected")]
+        [Comment("Check to assign the role to the user.")]
+        public bool IsSelected { get; set; }
+    }
+
+    private async Task OnValidSubmitAsync()
+    {
+        var userRoles = await UserManager.GetRolesAsync(user);
+        var rolesToRemove = userRoles.Except(UserRoleForm.Roles.Where(r => r.IsSelected).Select(r => r.Role.Name));
+        var rolesToAdd = UserRoleForm.Roles.Where(r => r.IsSelected).Select(r => r.Role.Name).Except(userRoles);
+
+        var addResult = await UserManager.AddToRolesAsync(user, rolesToAdd!);
+        var removeResult = await UserManager.RemoveFromRolesAsync(user, rolesToRemove!);
+
+        if (!addResult.Succeeded || !removeResult.Succeeded)
+        {
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to execute {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
+            Log.Logger.Error("Error: {@Error}", string.Join(",", addResult.Errors.Concat(removeResult.Errors).Select(error => error.Description)));
+            message = $"Error: {string.Join(",", addResult.Errors.Concat(removeResult.Errors).Select(error => error.Description))}";
+            return;
+        }
+
+        Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY executed {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
+        message = "Roles updated successfully.";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserManager.FindByIdAsync(userId);
+
+        UserRoleForm = new UserRoleFormModel
+        {
+            Roles = new List<UserRoleFormElement>()
+        };
+
+        var roles = await RoleManager.Roles.ToListAsync();
+        foreach (var role in roles)
+        {
+            UserRoleForm.Roles.Add(new UserRoleFormElement
+            {
+                Role = role,
+                IsSelected = await UserManager.IsInRoleAsync(user, role.Name)
+            });
+        }
+        Logger.LogInformation("Roles retrieved for User with ID '{UserId}'", userId);
+        await base.OnInitializedAsync();
+    }
+
+    private string GetRoleClass(string roleName)
+    {
+        return roleName switch
+        {
+            "Admin" => "danger",
+            "Staff" => "warning",
+            "Customer" => "primary",
+            _ => "secondary"
+        };
+    }
+}

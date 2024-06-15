@@ -1,0 +1,74 @@
+﻿@page "/UserManagement/{userId}/Delete"
+
+@inject ILogger<Delete> Logger
+
+<PageTitle>Delete User Account</PageTitle>
+
+<StatusMessage Message="@message"/>
+
+<h3>Delete User Account</h3>
+<div class="row">
+    <div class="col-md-6">
+        @if (userId != null)
+        {
+            <div class="alert alert-warning" role="alert">
+                <p>
+                    <strong>Deleting this account will permanently remove it, and this cannot be recovered.</strong>
+                </p>
+            </div>
+
+            <div>
+                <button class="btn btn-lg btn-danger" @onclick="DeleteAccount">Delete Account</button>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger" role="alert">
+                <p>
+                    <strong>Error: User not found</strong>
+                </p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string userId { get; set; }
+
+    private string? message;
+
+    private ApplicationUser user = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserManager.FindByIdAsync(userId: userId);
+        if (user == null)
+        {
+            message = "Error: User not found";
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task DeleteAccount()
+    {
+
+        var result = await UserManager.DeleteAsync(user);
+        if (!result.Succeeded)
+        {
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to execute {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
+            throw new InvalidOperationException("Unexpected error occurred deleting user.");
+        }
+
+        Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY executed {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
+        message = $"User account {user.Email} has been deleted. Redirecting to User Management page...";
+
+        // Wait for 3 seconds
+        await Task.Delay(3000);
+
+        // Redirect to the UserManagement page
+        NavigationManager.NavigateTo("/UserManagement");
+    }
+}

@@ -1,0 +1,222 @@
+@page "/product/add"
+@using Shop.Models.Requests
+@using Shop.WebApp.Extensions
+@using Shop.WebApp.Services.Contracts
+@rendermode InteractiveServer
+@inject IProductService ProductService
+@inject IProductCategoryService ProductCategoryService
+@inject ILogger<Product> Logger
+@inject IStorageService StorageService
+
+
+<div class="container-fluid">
+    <div class="card m-auto">
+        <h4 class="card-header">Header Placeholder</h4>
+        <div class="row">
+            <div class="col  m-md-auto">
+                <div class="card-body">
+                    <div class="container-fluid">
+                        <!-- Display the image -->
+                        <img class="img-thumbnail img-fluid" src="@ImageURL" alt="Product Image"/>
+                        <AuthorizeView Roles="Admin, Staff">
+                            <div class="input-group">
+                                <InputFile class="file-input" OnChange="OnChange" MaxFileSize="52428800" accept="image/png, image/jpeg, image/gif, image/heif image/heic" id="inputFile"/>
+                                <button class="btn btn-primary" @onclick="UploadToAzureStorage">Upload</button>
+                            </div>
+                        </AuthorizeView>
+                    </div>
+                </div>
+            </div>
+            <EditForm Model="product" OnValidSubmit="() => AddNewProduct()" class="form" FormName="product">
+                <div class="col">
+                    <div class="card-body">
+                        <DataAnnotationsValidator/>
+                        <ValidationSummary/>
+                        <div class="container">
+                            <div class="row mb-auto">
+                                <div class="input-group">
+                                    <div class="col">
+                                        <div class="input-group-text">Name</div>
+                                    </div>
+                                    <div class="col">
+                                        <InputText type="text" class="form-control" @bind-Value="@product.Name"/>
+                                        <ValidationMessage For="@(() => product.Name)" class="text-danger"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-auto">
+                                <div class="input-group">
+                                    <div class="col">
+                                        <div class="input-group-text">Description</div>
+                                    </div>
+                                    <div class="col">
+                                        <InputText type="text" class="form-control" @bind-Value="@product.Description"/>
+                                        <ValidationMessage For="@(() => product.Description)" class="text-danger"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-auto">
+                                <div class="input-group">
+                                    <div class="col">
+                                        <div class="input-group-text">Price</div>
+                                    </div>
+                                    <div class="col">
+                                        <InputNumber type="decimal" class="form-control" @bind-Value="product.Price"/>
+                                        <ValidationMessage For="@(() => product.Price)" class="text-danger"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-auto">
+                                <div class="input-group">
+                                    <div class="col">
+                                        <div class="input-group-text">Quantity</div>
+                                    </div>
+                                    <div class="col">
+                                        <InputNumber type="number" class="form-control" @bind-Value="product.Quantity"/>
+                                        <ValidationMessage For="@(() => product.Quantity)" class="text-danger"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-auto">
+                                <div class="input-group">
+                                    <div class="col">
+                                        <div class="input-group-text">Category</div>
+                                    </div>
+                                    <div class="col">
+                                        <InputSelect class="form-control" @bind-Value="product.CategoryId">
+                                            @if (productCategories == null)
+                                            {
+                                                <option>Loading...</option>
+                                            }
+                                            else
+                                            {
+                                                @foreach (var category in productCategories)
+                                                {
+                                                    <option value="@category.Id">@category.Name</option>
+                                                }
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success mt-3">Add Product</button>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public NewProductDto product { get; set; }
+
+    [Parameter]
+    public IEnumerable<ProductCategoryDto> productCategories { get; set; }
+
+    private string? ImageURL { get; set; } = "https://via.placeholder.com/150";
+
+    private string? Message { get; set; }
+
+    [CascadingParameter]
+    private AuthenticationState? AuthenticationState { get; set; }
+
+    public async void AddNewProduct()
+    {
+        product.CategoryId = (product.CategoryId == 0) ? productCategories.First().Id : product.CategoryId;
+
+        var result = await ProductService.AddProduct(product);
+        if (result != null)
+        {
+            Message = "Product added successfully";
+            ImageURL = result.ImageURL;
+            // Navigate to the /product/{id} page
+            NavigationManager.NavigateTo($"/product/{result.Id}");
+            Log.Logger.WithClassAndMethodNames<AddProduct>().Information($"User {AuthenticationState.User.Identity.Name} ADDED Product [{product.Name}] added SUCCESSFULLY [ID: {result.Id}]");
+        }
+        else
+        {
+            Message = "Product add failed";
+            Log.Logger.WithClassAndMethodNames<AddProduct>().Error($" User {AuthenticationState.User.Identity.Name} FAILED to add Product");
+        }
+    }
+
+    IBrowserFile image;
+
+    // Handle the file upload event and stream the file into a buffer
+    async Task OnChange(InputFileChangeEventArgs e)
+    {
+        image = e.File;
+    }
+
+    // Upload the image to the Azure Blob Storage
+    async Task UploadToAzureStorage()
+    {
+        if (image != null)
+        {
+            try
+            {
+                var result = await StorageService.UploadAsync(image);
+                if (result != null)
+                {
+                    product.Image = new ProductImageRequest()
+                    {
+                        Name = result.Blob.Name,
+                        ContentMD5 = null,
+                    };
+                    ImageURL = result.Blob.Uri;
+
+                    Log.Logger.WithClassAndMethodNames<AddProduct>().Information("Image uploaded successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.WithClassAndMethodNames<AddProduct>().Error(ex, "Failed to upload image");
+            }
+        }
+    }
+
+
+    public async Task<IEnumerable<ProductCategoryDto>> GetProductCategories()
+    {
+        return await ProductCategoryService.GetProductCategories();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        // Pre-authorize the user before deleting the product
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
+        if (!authorizationResult.Succeeded)
+        {
+            // The user is not authorized to delete products
+            Message = "You are not authorized to delete products.";
+            Logger.LogWarning("User is not authorized to delete products.");
+            // Log Details of the user
+            Logger.LogDebug("User Details: {user}", AuthenticationState.User);
+            return;
+        }
+        product = new NewProductDto();
+        productCategories = await GetProductCategories();
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        {
+            try
+            {
+                productCategories = await GetProductCategories();
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.WithClassAndMethodNames<Product>().Error(ex, "Failed to get product categories");
+                // Redirect to the /products page
+                NavigationManager.NavigateTo("/products");
+            }
+        }
+    }
+}

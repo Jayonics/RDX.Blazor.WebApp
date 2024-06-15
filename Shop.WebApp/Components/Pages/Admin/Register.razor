@@ -1,0 +1,123 @@
+﻿@page "/UserManagement/Register"
+@using System.ComponentModel.DataAnnotations
+
+@inject IUserStore<ApplicationUser> UserStore
+@inject ILogger<Register> Logger
+
+<PageTitle>Create an account</PageTitle>
+
+<h1>Create</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <StatusMessage Message="@Message"/>
+        <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
+            <DataAnnotationsValidator/>
+            <h2>Create an account.</h2>
+            <hr/>
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
+                <label for="email">Email</label>
+                <ValidationMessage For="() => Input.Email" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/>
+                <label for="password">Password</label>
+                <ValidationMessage For="() => Input.Password" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password"/>
+                <label for="confirm-password">Confirm Password</label>
+                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger"/>
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+
+    private IEnumerable<IdentityError>? identityErrors;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+
+    public async Task RegisterUser(EditContext editContext)
+    {
+        var user = CreateUser();
+
+        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+        var emailStore = GetEmailStore();
+        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+        var result = await UserManager.CreateAsync(user, Input.Password);
+
+        if (!result.Succeeded)
+        {
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to create user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, user.UserName);
+            identityErrors = result.Errors;
+            return;
+        }
+
+        // Generate an email confirmation token
+        var token = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+
+        // Confirm the user's email
+        var confirmEmailResult = await UserManager.ConfirmEmailAsync(user, token);
+        if (!confirmEmailResult.Succeeded)
+        {
+            // Log the error or throw an exception
+            Log.Logger.Error("{ClassName}: {Admin} FAILED to confirm email for user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, user.UserName);
+            return;
+        }
+
+        Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY created user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, user.UserName);
+
+        // Redirect to the user's profile page
+        NavigationManager.NavigateTo($"/UserManagement/{user.Id}/Profile");
+    }
+
+    private ApplicationUser CreateUser()
+    {
+        try
+        {
+            return Activator.CreateInstance<ApplicationUser>();
+        }
+        catch
+        {
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
+                                                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
+        }
+    }
+
+    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    {
+        if (!UserManager.SupportsUserEmail)
+        {
+            throw new NotSupportedException("The default UI requires a user store with email support.");
+        }
+        return (IUserEmailStore<ApplicationUser>)UserStore;
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "Password")]
+        public string Password { get; set; } = "";
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm password")]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        public string ConfirmPassword { get; set; } = "";
+    }
+
+}

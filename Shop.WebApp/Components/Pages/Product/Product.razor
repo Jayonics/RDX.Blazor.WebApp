@@ -1,0 +1,356 @@
+@page "/product/{Id:int}"
+@using Shop.Models.Requests
+@using Shop.WebApp.Extensions
+@using Shop.WebApp.Services.Contracts
+@rendermode InteractiveServer
+@inject IProductService ProductService
+@inject IProductCategoryService ProductCategoryService
+@inject ILogger<Product> Logger
+@inject IStorageService StorageService
+
+@if (product == null)
+{
+    <div class="spinner-border text-info" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <div class="container-fluid">
+        @if (!string.IsNullOrWhiteSpace(Message))
+        {
+            <div class="alert alert-warning" role="alert">
+                @Message
+            </div>
+        }
+        <div class="card m-auto">
+            <h4 class="card-header">@product.Name</h4>
+            <div class="row">
+                <div class="col  m-md-auto">
+                    <div class="card-body">
+                        <div class="container-fluid">
+                            <!-- Display the image -->
+                            <img class="img-thumbnail img-fluid" src="@product.ImageURL" alt="Product Image"/>
+                            <AuthorizeView Roles="Admin, Staff">
+                                <div class="input-group">
+                                    <InputFile class="file-input" OnChange="OnChange" MaxFileSize="52428800" accept="image/png, image/jpeg, image/gif, image/heif image/heic" id="inputFile"/>
+                                    <button class="btn btn-primary" @onclick="UpdateProductImage">Upload</button>
+                                </div>
+                            </AuthorizeView>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card-body">
+                        <p class="card-text">@product.Description</p>
+                        <div class="container-fluid">
+                            <EditForm Model="product" OnSubmit="UpdateProduct" class="form" FormName="product">
+                                <div class="row mb-auto">
+                                    <div class="input-group">
+                                        <div class="col">
+                                            <div class="input-group-text">Name</div>
+                                        </div>
+                                        <div class="col">
+                                            @if (EditMode == true)
+                                            {
+                                                <InputText type="text" class="form-control" @bind-Value="@product.Name"/>
+                                            }
+                                            else
+                                            {
+                                                <span class="form-control">@product.Name</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-auto">
+                                    <div class="input-group">
+                                        <div class="col">
+                                            <div class="input-group-text">Price</div>
+                                        </div>
+                                        <div class="col">
+                                            @if (EditMode == true)
+                                            {
+                                                <InputNumber type="decimal" class="form-control" @bind-Value="product.Price"/>
+                                            }
+                                            else
+                                            {
+                                                <span class="form-control">@product.Price.ToString("C")</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-auto">
+                                    <div class="input-group">
+                                        <div class="col">
+                                            <div class="input-group-text">Quantity</div>
+                                        </div>
+                                        <div class="col">
+                                            @if (EditMode == true)
+                                            {
+                                                <InputNumber type="number" class="form-control" @bind-Value="product.Quantity"/>
+                                            }
+                                            else
+                                            {
+                                                <span class="form-control">@product.Quantity</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-auto">
+                                    <div class="input-group">
+                                        <div class="col">
+                                            <div class="input-group-text">Category</div>
+                                        </div>
+                                        <div class="col">
+                                            @if (EditMode == true)
+                                            {
+                                                <InputSelect class="form-control" @bind-Value="product.CategoryId">
+                                                    @foreach (var category in productCategories)
+                                                    {
+                                                        <option value="@category.Id">@category.Name</option>
+                                                    }
+                                                </InputSelect>
+                                            }
+                                            else
+                                            {
+                                                <span class="form-control">@product.CategoryName</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (EditMode == true)
+                                {
+                                    <button class="btn btn-success mt-3" @onclick="UpdateProduct">Save Changes</button>
+                                }
+                            </EditForm>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label h5">Quantity</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="quantity" min="1" max="@product.Quantity" value="1">
+                                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <AuthorizeView Roles="Admin, Staff">
+                <div class="card-footer">
+                    <h5 class="card-title text-danger">Administrative actions</h5>
+                    <div class="container">
+                        <button class="btn btn-primary" @onclick="() => EditMode = true">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteProduct()">Delete</button>
+                    </div>
+                </div>
+            </AuthorizeView>
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    public ProductDto product { get; set; }
+
+    [Parameter]
+    public IEnumerable<ProductCategoryDto> productCategories { get; set; }
+
+    [SupplyParameterFromQuery]
+    private bool? EditMode { get; set; } = false;
+
+    private string? ImageURL { get; set; } = "https://via.placeholder.com/150";
+
+    private string? Message { get; set; }
+
+    [CascadingParameter]
+    private AuthenticationState? AuthenticationState { get; set; }
+
+    public async Task<IEnumerable<ProductCategoryDto>> GetProductCategories()
+    {
+        return await ProductCategoryService.GetProductCategories();
+    }
+
+
+    // Add Authorization restriction to this method
+    [Authorize(Roles = "Admin, Staff")]
+    private async void DeleteProduct()
+    {
+        // Pre-authorize the user before deleting the product
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
+        if (!authorizationResult.Succeeded)
+        {
+            // The user is not authorized to delete products
+            Message = "You are not authorized to delete products.";
+            Logger.LogWarning("User is not authorized to delete products.");
+            // Log Details of the user
+            Logger.LogDebug("User Details: {user}", AuthenticationState.User);
+            return;
+        }
+
+        // Log the pre-action state of the product object
+        Logger.LogDebug("Product to delete: {product}", product);
+
+        // Call the service to delete the product
+        try
+        {
+            var result = await ProductService.DeleteProduct(product.Id);
+            // If the result is true, the product was deleted successfully
+            if (result)
+            {
+                Message = "Product deleted successfully";
+                Logger.LogInformation($"Product deletion result: {result}");
+
+                // Trigger a UI refresh to update the message
+                await InvokeAsync(() => StateHasChanged());
+
+                // Wait for a duration before redirecting
+                await Task.Delay(TimeSpan.FromSeconds(3));
+                NavigationManager.NavigateTo("/products");
+            }
+            else
+            {
+                Message = "Product deletion failed";
+                Logger.LogError($"Product deletion failed: {result}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception and set the message
+            Logger.LogCritical(ex, $"Product delete failed: {ex.Message}");
+            Message = $"Product delete failed: {ex.Message}";
+        }
+    }
+
+    // Add Authorization restriction to this method
+    [Authorize(Roles = "Admin, Staff")]
+    private async void UpdateProduct()
+    {
+        // Pre-authorize the user before updating the product
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
+        if (!authorizationResult.Succeeded)
+        {
+            // The user is not authorized to update products
+            Message = "You are not authorized to update products.";
+            Logger.LogWarning("User is not authorized to update products.");
+            // Log Details of the user
+            Logger.LogDebug("User Details: {user}", AuthenticationState.User);
+            return;
+        }
+
+        // Log all properties of the product object
+        Log.Logger.WithClassAndMethodNames<Product>().Debug("Product to update: {@product}", product);
+
+        // Call the service to update the product
+        try
+        {
+            var result = await ProductService.UpdateProduct(product);
+            // If the result is not null, the product was updated successfully
+            if (result != null)
+            {
+                Message = "Product updated successfully";
+                ImageURL = result.ImageURL;
+                product = result;// Update the product with the returned result
+                Log.Logger.WithClassAndMethodNames<Product>().Information($"{AuthenticationState.User.Identity.Name} UPDATED product {@product.Name} SUCCESSFULLY");
+            }
+            else
+            {
+                Message = "Product update failed";
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception and set the message
+            Log.Logger.WithClassAndMethodNames<Product>().Error(ex, $"User {AuthenticationState.User.Identity.Name} FAILED to UPDATE Product {@product.Name}");
+            Message = $"Product update failed: {ex.Message}";
+        }
+
+        // Set the EditMode to false
+        EditMode = false;
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    IBrowserFile image;
+
+    // Handle the file upload event and stream the file into a buffer
+    async Task OnChange(InputFileChangeEventArgs e)
+    {
+        image = e.File;
+    }
+
+    // Upload the image to the Azure Blob Storage
+    async Task UpdateProductImage()
+    {
+        if (image != null)
+        {
+            try
+            {
+                var result = await StorageService.UploadForceAsync(image);
+                if (result != null)
+                {
+                    product.Image = new ProductImageRequest()
+                    {
+                        Name = result.Blob.Name,
+                        ContentMD5 = null,
+                    };
+                    product.ImageURL = result.Blob.Uri;
+
+                    Message = "Image uploaded successfully";
+                    Log.Logger.WithClassAndMethodNames<Product>().Information($"User {AuthenticationState.User.Identity.Name} UPDATED Image {product.ImageURL} FOR Product {@product.Name} SUCCESSFULLY");
+
+                    await InvokeAsync(() => StateHasChanged());
+                }
+            }
+            catch (Exception ex)
+            {
+                Message = "Failed to upload image";
+                Log.Logger.WithClassAndMethodNames<Product>().Error(ex, $"User {AuthenticationState.User.Identity.Name} FAILED to UPDATE Image FOR Product {@product.Name}");
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        productCategories = await GetProductCategories();
+        product = await ProductService.GetProduct(Id);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Pre-authorize the user before updating the product
+        var authorizationResult = await AuthorizationService.AuthorizeAsync(AuthenticationState.User, "AdminOrStaff");
+        if (!authorizationResult.Succeeded)
+        {
+            Log.Logger.WithClassAndMethodNames<Product>().Warning("User is not authorized to edit products.");
+            EditMode = false;
+        }
+
+        if (EditMode == true)
+        {
+            try
+            {
+                product = await ProductService.GetProduct(Id);
+                productCategories = await ProductCategoryService.GetProductCategories();
+                
+                // If in EditMode and product.CategoryId is not valid, select the first category
+                if (EditMode == true && product.CategoryId == 0 && productCategories.Any())
+                {
+                    product.CategoryId = productCategories.First().Id;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.WithClassAndMethodNames<Product>().Error(ex, "Failed to load product details for editing.");
+                // Redirect to the /products page
+                NavigationManager.NavigateTo("/products");
+            }
+        }
+    }
+}
