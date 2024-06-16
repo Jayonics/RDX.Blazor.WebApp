@@ -1,9 +1,7 @@
 using System.Runtime.CompilerServices;
-using Microsoft.AspNetCore.Authorization;
-using Shop.Shared.Entities;
 using ILogger=Serilog.ILogger;
 
-namespace Shop.WebApp.Extensions
+namespace Shop.Shared.Extensions
 {
     public static class LoggerExtensions
     {
