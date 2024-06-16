@@ -2,7 +2,6 @@
 using Shop.Shared.Data;
 using Shop.Shared.Entities;
 using Shop.API.Repositories.Contracts;
-using Microsoft.Extensions.Configuration;
 using Shop.Shared.Extensions;
 
 namespace Shop.API.Repositories
