@@ -9,7 +9,6 @@ using Shop.Shared.Entities;
 using Shop.WebApp.Services;
 using Shop.WebApp.Services.Contracts;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
 using Serilog.Filters;
 using Serilog.Templates;
@@ -35,50 +34,48 @@ namespace Shop.WebApp
 
                 // Add the Serilog Service to the container (NuGet package).
                 Log.Logger = new LoggerConfiguration()
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .CreateBootstrapLogger();
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console()
+                    .CreateBootstrapLogger();
 
                 builder.Services.AddSerilog((services, lc) => lc
-                .ReadFrom.Configuration(builder.Configuration)
-                .ReadFrom.Services(services)
-                .Enrich.FromLogContext()
-                // Default File Log
-                .WriteTo.Logger(x => {
-                    x.Filter.ByExcluding(Matching.WithProperty<string>("SourceContext", sc => sc == "Microsoft.EntityFrameworkCore.Database.Command"));
-                    x.WriteTo.File(
-                    path: "Logs/Logs_.log",
-                    restrictedToMinimumLevel: LogEventLevel.Information,
-                    outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level} <{SourceContext}>] {Message:lj}{NewLine}{Exception}",
-                    rollingInterval: RollingInterval.Day
-                    );
-                })
-                .WriteTo.Logger(x => {
-                    // Filter "Microsoft.EntityFrameworkCore.Database.Command" SourceContext logs from the default loggers and log exclusively to the SqlLogs.txt file.
-                    x.Filter.ByIncludingOnly(Matching.WithProperty<string>("SourceContext", sc => sc == "Microsoft.EntityFrameworkCore.Database.Command"));
-                    x.WriteTo.File(
-                    path: "Logs/EntityFrameworkLogs_.log",
-                    restrictedToMinimumLevel: LogEventLevel.Information,
-                    outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level} <{SourceContext}>] {Message:lj}{NewLine}{Exception}",
-                    rollingInterval: RollingInterval.Day
-                    );
-                })
-                .WriteTo.Logger(x => {
-                    x.Filter.ByExcluding(Matching.WithProperty<string>("SourceContext", sc => sc == "Microsoft.EntityFrameworkCore.Database.Command"));
-                    // Exclude "Microsoft.EntityFrameworkCore.Database.Command" SourceContext logs from the console logger.
-                    x.WriteTo.Console(
-                    restrictedToMinimumLevel: LogEventLevel.Information,
-                    theme: Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme.Code,
-                    outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Level}] [HTTP:<ReqID:{RequestId}>] [<s:{SourceContext}>|<c:{ClassName}>|<m:{MethodName}>] {Message:lj}{NewLine}{Exception}",
-                    applyThemeToRedirectedOutput: true
-                    );
-                })
-                .WriteTo.Logger(x => {
-                    // Debug Console Log, only for Debug builds and loglevel above Information
-                    x.WriteTo.Debug(
-                    restrictedToMinimumLevel: LogEventLevel.Debug
-                    );
-                })
+                    .ReadFrom.Configuration(builder.Configuration)
+                    .ReadFrom.Services(services)
+                    .Enrich.FromLogContext()
+                    // Default File Log
+                    .WriteTo.Logger(x =>
+                    {
+                        x.Filter.ByExcluding(Matching.WithProperty<string>("SourceContext", sc => sc == "Microsoft.EntityFrameworkCore.Database.Command"));
+                        x.WriteTo.File(
+                        path: "Logs/Logs_.log",
+                        restrictedToMinimumLevel: LogEventLevel.Information,
+                        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level} <{SourceContext}>] {Message:lj}{NewLine}{Exception}",
+                        rollingInterval: RollingInterval.Day
+                        );
+                    })
+                    .WriteTo.Logger(x =>
+                    {
+                        // Filter "Microsoft.EntityFrameworkCore.Database.Command" SourceContext logs from the default loggers and log exclusively to the SqlLogs.txt file.
+                        x.Filter.ByIncludingOnly(Matching.WithProperty<string>("SourceContext", sc => sc == "Microsoft.EntityFrameworkCore.Database.Command"));
+                        x.WriteTo.File(
+                            path: "Logs/EntityFrameworkLogs_.log",
+                            restrictedToMinimumLevel: LogEventLevel.Information,
+                            outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level} <{SourceContext}>] {Message:lj}{NewLine}{Exception}",
+                            rollingInterval: RollingInterval.Day
+                        );
+                    })
+                    .WriteTo.Logger(x =>
+                    {
+                        x.Filter.ByExcluding(Matching.WithProperty<string>("SourceContext", sc => sc == "Microsoft.EntityFrameworkCore.Database.Command"));
+                        // Exclude "Microsoft.EntityFrameworkCore.Database.Command" SourceContext logs from the console logger.
+                        x.WriteTo.Console(
+                            theme: Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme.Code,
+                            outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Level}] [HTTP:<ReqID:{RequestId}>] [<s:{SourceContext}>|<c:{ClassName}>|<m:{MethodName}>] {Message:lj}{NewLine}{Exception}"
+                        );
+                        // x.WriteTo.Console(
+                        // new ExpressionTemplate("[{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Level}] [<s:{SourceContext}>{#if ClassName is not null}|<c:{ClassName}>{#end}{if MethodName is not null}|<m:{MethodName}>{#end}] {Message:lj}{NewLine}{Exception}")
+                        // );
+                    })
                 );
 
                 // Add the BlazorBoostrap Service to the container (NuGet package).
