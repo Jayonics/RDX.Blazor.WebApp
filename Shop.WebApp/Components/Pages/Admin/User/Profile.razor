@@ -73,12 +73,10 @@ else
             if (!setPhoneResult.Succeeded)
             {
                 message = $"Error: {string.Join(",", setPhoneResult.Errors.Select(error => error.Description))}";
-                Log.Logger.Error("{ClassName}: {Admin} FAILED to execute {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
                 return;
             }
             else
             {
-                Log.Logger.Information("{ClassName}: {Admin} SUCCESSFULLY executed {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
                 message = "Your phone number has been updated";
             }
         }

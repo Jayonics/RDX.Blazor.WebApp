@@ -7,7 +7,9 @@
 @inject IProductService ProductService
 @inject IProductCategoryService ProductCategoryService
 @inject ILogger<Product> Logger
+@inject NavigationManager NavigationManager
 @inject IStorageService StorageService
+@inject IAuthorizationService AuthorizationService
 
 
 <div class="container-fluid">
@@ -135,12 +137,10 @@
             ImageURL = result.ImageURL;
             // Navigate to the /product/{id} page
             NavigationManager.NavigateTo($"/product/{result.Id}");
-            Log.Logger.WithClassAndMethodNames<AddProduct>().Information($"User {AuthenticationState.User.Identity.Name} ADDED Product [{product.Name}] added SUCCESSFULLY [ID: {result.Id}]");
         }
         else
         {
             Message = "Product add failed";
-            Log.Logger.WithClassAndMethodNames<AddProduct>().Error($" User {AuthenticationState.User.Identity.Name} FAILED to add Product");
         }
     }
 
@@ -169,12 +169,16 @@
                     };
                     ImageURL = result.Blob.Uri;
 
-                    Log.Logger.WithClassAndMethodNames<AddProduct>().Information("Image uploaded successfully");
+                    Logger.LogInformation("Image uploaded successfully");
+                }
+                else
+                {
+                    Logger.LogError("Failed to upload image");
                 }
             }
             catch (Exception ex)
             {
-                Log.Logger.WithClassAndMethodNames<AddProduct>().Error(ex, "Failed to upload image");
+                Logger.LogError(ex, "Failed to upload image");
             }
         }
     }
@@ -214,7 +218,7 @@
             }
             catch (Exception ex)
             {
-                Log.Logger.WithClassAndMethodNames<Product>().Error(ex, "Failed to get product categories");
+                Logger.LogError(ex, "Unable to fetch product details");
                 // Redirect to the /products page
                 NavigationManager.NavigateTo("/products");
             }

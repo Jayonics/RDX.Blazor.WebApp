@@ -14,9 +14,7 @@
 else
 {
     <h2>Modify Account</h2>
-    <h3 class="mb-3">
-        <span class="badge bg-secondary">@user.UserName</span>
-    </h3>
+    <h3 class="mb-3"><span class="badge bg-secondary">@user.UserName</span></h3>
     <hr/>
     <div class="row">
         <!-- Your layout here -->
@@ -48,21 +46,27 @@ else
             user = await UserManager.FindByIdAsync(userId);
         }
 
-        if (!AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User.Identity.IsAuthenticated)
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var claimsPrincipal = authState.User;
+
+        // If the client attempting to access the UserManagement is not authenticated, log a warning
+        if (claimsPrincipal.Identity != null && claimsPrincipal.Identity.IsAuthenticated)
         {
-            Log.Logger.Warning("{ClassName}: {Admin} an unauthenticated user attempted to access the page and was denied access", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name);
-            NavigationManager.NavigateTo("/Identity/Account/Login");
+            // If the client is authenticated, log the user's email, page, and action
+            // Logger.LogInformation($"Privileged user {claimsPrincipal.Identity.Name} accessed the User Management page for user {user.UserName}.");
+            // Log.Logger.WithClassAndMethodNames<UserManagementLayout>().Information("{ClassName} - {MethodName} page accessed by {User} for user {UserName}", typeof().Name claimsPrincipal.Identity.Name, user.UserName);
+            Log.Logger.Information("{ClassName} - {MethodName} page accessed by {Admin} on behalf of user {User}", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name, user.UserName);
+
         }
         else
         {
-            Log.Logger.Information("{ClassName}: {Admin} accessed the {MethodName} on behalf of user {User}", GetType().FullName, AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.Name, MethodBase.GetCurrentMethod().ReflectedType.Name, user.UserName);
+            // If the client is not authenticated, log a warning
+            // Logger.LogWarning("An unauthenticated user accessed the User Management page.");
+            // Log.Logger.WithClassAndMethodNames<UserManagementLayout>().Warning("An unauthenticated user accessed the User Management page");
+            Log.Logger.Warning("{ClassName} - {MethodName} an unauthenticated user attempted to access the page but failed", GetType().Name, MethodBase.GetCurrentMethod().ReflectedType.Name ,claimsPrincipal.Identity.Name, user.UserName);
+            NavigationManager.NavigateTo("/Identity/Account/Login");
         }
 
         await base.OnParametersSetAsync();
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
     }
 }

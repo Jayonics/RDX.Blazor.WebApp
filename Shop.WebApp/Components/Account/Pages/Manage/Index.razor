@@ -62,13 +62,11 @@
             var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
             if (!setPhoneResult.Succeeded)
             {
-                Log.Logger.Error("Failed to set phone number for user {User}. Errors: {@Errors}", user.Id, @setPhoneResult.Errors);
                 RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
             }
         }
 
         await SignInManager.RefreshSignInAsync(user);
-        Log.Logger.Information("User {User} updated their phone number.", user.Id);
         RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
     }
 
