@@ -9,8 +9,10 @@ using Shop.Shared.Entities;
 using Shop.WebApp.Services;
 using Shop.WebApp.Services.Contracts;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
 using Serilog.Filters;
+using Serilog.Templates;
 
 namespace Shop.WebApp
 {
